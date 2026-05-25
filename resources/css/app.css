@@ -224,3 +224,28 @@ select:focus[data-flux-control] {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* ===== Auth Card Dark Theme ===== */
+[data-flux-input] input,
+[data-flux-input] textarea,
+[data-flux-select] select {
+    @apply bg-white/5 border-white/10 text-white placeholder:text-zinc-500;
+}
+
+[data-flux-input] input:focus,
+[data-flux-input] textarea:focus,
+[data-flux-select] select:focus {
+    @apply border-hrms-500/50 ring-hrms-500/20;
+}
+
+[data-flux-label] {
+    @apply text-zinc-300;
+}
+
+[data-flux-checkbox] {
+    @apply border-white/20 bg-white/5;
+}
+
+[data-flux-checkbox]:checked {
+    @apply bg-hrms-600 border-hrms-600;
+}

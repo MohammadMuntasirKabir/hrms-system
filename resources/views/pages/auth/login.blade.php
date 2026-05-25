@@ -1,18 +1,18 @@
 <x-layouts::auth :title="__('Sign in')">
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-5">
         <x-auth-header :title="__('Welcome back')" :description="__('Sign in to your HRMS account to manage your organization')" />
 
         <x-auth-session-status class="text-center" :status="session('status')" />
 
         @if (session('error'))
-            <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-300">
+            <div class="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
                 {{ session('error') }}
             </div>
         @endif
 
         <x-passkey-verify />
 
-        <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-5">
+        <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-4">
             @csrf
 
             <flux:input
@@ -38,7 +38,7 @@
                 />
 
                 @if (Route::has('password.request'))
-                    <flux:link class="absolute top-0 text-sm end-0 text-hrms-600 dark:text-hrms-400 hover:underline" :href="route('password.request')" wire:navigate>
+                    <flux:link class="absolute top-0 text-sm end-0 text-hrms-400 hover:text-hrms-300 hover:underline" :href="route('password.request')" wire:navigate>
                         {{ __('Forgot password?') }}
                     </flux:link>
                 @endif
@@ -52,9 +52,9 @@
         </form>
 
         @if (Route::has('register'))
-            <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-500 dark:text-zinc-400 pt-2">
+            <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-500 pt-1">
                 <span>{{ __("Don't have an account?") }}</span>
-                <flux:link :href="route('register')" wire:navigate class="text-hrms-600 dark:text-hrms-400 font-medium hover:underline">{{ __('Create one') }}</flux:link>
+                <flux:link :href="route('register')" wire:navigate class="text-hrms-400 font-medium hover:text-hrms-300 hover:underline">{{ __('Create one') }}</flux:link>
             </div>
         @endif
     </div>
