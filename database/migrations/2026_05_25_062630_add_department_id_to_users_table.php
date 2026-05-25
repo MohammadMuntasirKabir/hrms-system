@@ -1,0 +1,19 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // department_id already added in add_company_fields_to_users_table migration
+        // This migration is kept for rollback reference
+    }
+
+    public function down(): void
+    {
+        // No-op: column was originally added in add_company_fields_to_users_table
+    }
+};
