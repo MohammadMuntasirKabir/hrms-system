@@ -56,6 +56,16 @@
                         <flux:sidebar.item icon="building-office" :href="route('companies.index', session('filter_company_id') ? ['company_id' => session('filter_company_id')] : [])" :current="request()->routeIs('companies.*')" wire:navigate>
                             {{ __('Companies') }}
                         </flux:sidebar.item>
+                        @can('departments.view')
+                            <flux:sidebar.item icon="building-office-2" :href="route('departments.index', session('filter_company_id') ? ['company_id' => session('filter_company_id')] : [])" :current="request()->routeIs('departments.*')" wire:navigate>
+                                {{ __('Departments') }}
+                            </flux:sidebar.item>
+                        @endcan
+                    </flux:sidebar.group>
+                </flux:sidebar.nav>
+            @elsecan('departments.view')
+                <flux:sidebar.nav class="px-3">
+                    <flux:sidebar.group :heading="__('Organization')" class="grid">
                         <flux:sidebar.item icon="building-office-2" :href="route('departments.index', session('filter_company_id') ? ['company_id' => session('filter_company_id')] : [])" :current="request()->routeIs('departments.*')" wire:navigate>
                             {{ __('Departments') }}
                         </flux:sidebar.item>

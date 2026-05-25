@@ -8,20 +8,22 @@ use Illuminate\View\View;
 
 class CompanyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (!$request->user()->isSuperAdmin()) {
+                abort(403, 'Only super admins can manage companies.');
+            }
+            return $next($request);
+        });
+    }
+
     public function index(Request $request): View
     {
-        $user = $request->user();
-
-        $query = Company::withCount(['users', 'departments', 'designations', 'contracts'])
-            ->with('childCompanies');
-
-        if (!$user->isSuperAdmin()) {
-            // Non-super-admins see only their company and its sub-companies
-            $allowedIds = $user->getAllowedCompanyIds();
-            $query->whereIn('id', $allowedIds);
-        }
-
-        $companies = $query->orderBy('name')->paginate(20);
+        $companies = Company::withCount(['users', 'departments', 'designations', 'contracts'])
+            ->with('childCompanies')
+            ->orderBy('name')
+            ->paginate(20);
 
         return view('companies.index', ['companies' => $companies]);
     }
