@@ -65,6 +65,11 @@ class Company extends Model
         return $this->hasMany(Salary::class);
     }
 
+    public function applicants(): HasMany
+    {
+        return $this->hasMany(JobApplicant::class);
+    }
+
     public function activeContracts(): HasMany
     {
         return $this->hasMany(Contract::class)->where('status', 'active');

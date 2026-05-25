@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Contract;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\JobApplicant;
 use App\Models\Salary;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -182,6 +183,70 @@ class RolePermissionSeeder extends Seeder
         $dc1 = Contract::create(['user_id' => $dfLead->id, 'company_id' => $dataFlow->id, 'department_id' => $dsDept->id, 'contract_type' => 'full_time', 'position' => 'Lead Data Scientist', 'start_date' => '2024-04-01', 'salary' => 130000, 'currency' => 'BDT', 'status' => 'active']);
 
         $this->createSalary($dfLead, $dataFlow, $dsDept, $dsLead, $dc1, 130000, 18000, 6000, $admin);
+
+        // === Seed Job Applicants for all companies ===
+        $this->seedApplicants($techCorp, $engDept, $hrDept, $finDept, $srEng, $jrEng, $hrMgr, $acct);
+        $this->seedApplicants($greenLeaf, $opsDept, $mktDept, null, $opsMgr, $coord, null, null);
+        $this->seedApplicants($dataFlow, $dsDept, null, null, $dsLead, null, null, null);
+    }
+
+    private function seedApplicants(Company $company, ?Department $dept1, ?Department $dept2, ?Department $dept3, ?Designation $desig1, ?Designation $desig2, ?Designation $desig3, ?Designation $desig4): void
+    {
+        $firstNames = ['Arif', 'Nusrat', 'Kamal', 'Sabbir', 'Mithila', 'Tanvir', 'Priya', 'Farhan', 'Riya', 'Jahangir', 'Sneha', 'Imran'];
+        $lastNames = ['Hossain', 'Begum', 'Rahman', 'Ahmed', 'Sarkar', 'Islam', 'Das', 'Khan', 'Akter', 'Alam', 'Roy', 'Haque'];
+        $sources = ['Website', 'LinkedIn', 'Indeed', 'Referral', 'Glassdoor'];
+        $cities = ['Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi', 'Khulna', 'Barisal', 'Comilla', 'Rangpur'];
+        $statuses = ['pending', 'pending', 'pending', 'reviewing', 'reviewing', 'shortlisted', 'shortlisted', 'hired', 'rejected', 'rejected'];
+
+        $depts = array_filter([$dept1, $dept2, $dept3]);
+        $desigs = array_filter([$desig1, $desig2, $desig3, $desig4]);
+        $usedEmails = [];
+
+        for ($i = 0; $i < 12; $i++) {
+            $slug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $company->slug));
+            $email = strtolower($firstNames[$i]) . '.' . $slug . '@email.com';
+
+            // Ensure unique email
+            if (in_array($email, $usedEmails)) {
+                $email = strtolower($firstNames[$i]) . rand(10, 99) . '.' . $slug . '@email.com';
+            }
+            $usedEmails[] = $email;
+
+            $dept = !empty($depts) ? $depts[array_rand($depts)] : null;
+            $desig = !empty($desigs) ? $desigs[array_rand($desigs)] : null;
+            $status = $statuses[array_rand($statuses)];
+            $salary = rand(35000, 150000);
+            $createdDaysAgo = rand(1, 45);
+            $createdAt = now()->subDays($createdDaysAgo);
+
+            $applicantData = [
+                'company_id' => $company->id,
+                'department_id' => $dept?->id,
+                'designation_id' => $desig?->id,
+                'first_name' => $firstNames[$i],
+                'last_name' => $lastNames[$i],
+                'email' => $email,
+                'phone' => '+880 1' . rand(7, 9) . rand(10000000, 99999999),
+                'address' => rand(1, 99) . ' ' . ['Road', 'Avenue', 'Lane', 'Street'][array_rand(['Road', 'Avenue', 'Lane', 'Street'])] . ', ' . $cities[array_rand($cities)],
+                'city' => $cities[array_rand($cities)],
+                'country' => 'BD',
+                'cover_letter' => 'I am excited to apply for this position at ' . $company->name . '. I have relevant experience and skills that make me a strong candidate for this role. I am eager to contribute to the team and grow with the organization.',
+                'source' => $sources[array_rand($sources)],
+                'expected_salary' => $salary,
+                'currency' => 'BDT',
+                'available_from' => now()->addDays(rand(7, 90)),
+                'status' => $status,
+                'notes' => 'Auto-seeded applicant record for testing.',
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
+            ];
+
+            if (in_array($status, ['reviewing', 'shortlisted', 'hired', 'rejected'])) {
+                $applicantData['reviewed_at'] = $createdAt->copy()->addDays(rand(1, 5));
+            }
+
+            JobApplicant::create($applicantData);
+        }
     }
 
     private function createSalary(User $user, Company $company, Department $department, Designation $designation, Contract $contract, float $base, float $allowances, float $deductions, User $creator): void
