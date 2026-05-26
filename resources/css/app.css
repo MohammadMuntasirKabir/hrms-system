@@ -57,22 +57,98 @@
     }
 }
 
-[data-flux-field]:not(ui-radio, ui-checkbox) {
-    @apply grid gap-2;
-}
+@layer components {
+    /* Stat card hover effect */
+    .hrms-stat-card {
+        @apply transition-all duration-200;
+    }
+    .hrms-stat-card:hover {
+        @apply shadow-lg;
+        transform: translateY(-2px);
+    }
 
-[data-flux-label] {
-    @apply  !mb-0 !leading-tight;
-}
+    /* Stat card icon container */
+    .hrms-stat-icon {
+        @apply flex items-center justify-center w-10 h-10 rounded-lg;
+    }
 
-input:focus[data-flux-control],
-textarea:focus[data-flux-control],
-select:focus[data-flux-control] {
-    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
+    /* Badge refinements */
+    .hrms-badge-success {
+        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700;
+    }
+    .dark .hrms-badge-success {
+        @apply bg-emerald-900/30 text-emerald-400;
+    }
+    .hrms-badge-danger {
+        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700;
+    }
+    .dark .hrms-badge-danger {
+        @apply bg-red-900/30 text-red-400;
+    }
+    .hrms-badge-info {
+        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700;
+    }
+    .dark .hrms-badge-info {
+        @apply bg-blue-900/30 text-blue-400;
+    }
+    .hrms-badge-warning {
+        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700;
+    }
+    .dark .hrms-badge-warning {
+        @apply bg-amber-900/30 text-amber-400;
+    }
+    .hrms-badge-neutral {
+        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600;
+    }
+    .dark .hrms-badge-neutral {
+        @apply bg-zinc-800 text-zinc-400;
+    }
+    .hrms-badge-purple {
+        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700;
+    }
+    .dark .hrms-badge-purple {
+        @apply bg-purple-900/30 text-purple-400;
+    }
+
+    /* Content card */
+    .hrms-card {
+        @apply bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden;
+    }
+    .hrms-card-body {
+        @apply p-5 sm:p-6;
+    }
+
+    /* Card inner list rows */
+    .hrms-list-row {
+        @apply py-3 px-1;
+    }
+    .hrms-list-row:first-child {
+        @apply pt-1;
+    }
+
+    /* Action button group */
+    .hrms-actions {
+        @apply flex flex-wrap items-center gap-2;
+    }
+
+    /* Empty state */
+    .hrms-empty-state {
+        @apply flex flex-col items-center justify-center py-12 text-center;
+    }
+    .hrms-empty-state-icon {
+        @apply w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4;
+    }
+
+    /* Auth gradient */
+    .hrms-auth-gradient {
+        background: linear-gradient(135deg, #0c1222 0%, #1e3a8a 50%, #2563eb 100%);
+    }
+    .dark .hrms-auth-gradient {
+        background: linear-gradient(135deg, #0c1222 0%, #0f1629 50%, #1e3a8a 100%);
+    }
 }
 
 /* ===== Dark Blue Sidebar ===== */
-/* Force the sidebar to use our dark blue regardless of light/dark mode */
 [flux-sidebar] {
     --sidebar-bg: #0c1222 !important;
     --sidebar-border: #0f1629 !important;
@@ -80,35 +156,29 @@ select:focus[data-flux-control] {
     border-color: #0f1629 !important;
 }
 
-/* Sidebar nav items - default state */
 [flux-sidebar] [data-flux-sidebar-item] {
     color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* Sidebar nav items - hover */
 [flux-sidebar] [data-flux-sidebar-item]:hover {
     color: rgba(255, 255, 255, 0.9) !important;
     background-color: rgba(255, 255, 255, 0.06) !important;
 }
 
-/* Sidebar nav items - active/current */
 [flux-sidebar] [data-flux-sidebar-item][data-current="true"],
 [flux-sidebar] [data-flux-sidebar-item].active {
     color: #ffffff !important;
     background-color: rgba(59, 130, 246, 0.2) !important;
 }
 
-/* Sidebar group headings */
 [flux-sidebar] [data-flux-sidebar-group-heading] {
     color: rgba(255, 255, 255, 0.35) !important;
 }
 
-/* Sidebar brand/logo area */
 [flux-sidebar] [data-flux-sidebar-brand] {
     color: #ffffff !important;
 }
 
-/* Sidebar icons */
 [flux-sidebar] [data-flux-sidebar-item] svg {
     color: rgba(255, 255, 255, 0.5) !important;
 }
@@ -118,7 +188,6 @@ select:focus[data-flux-control] {
     color: #60a5fa !important;
 }
 
-/* Sidebar collapse button */
 [flux-sidebar] [data-flux-sidebar-collapse] {
     color: rgba(255, 255, 255, 0.4) !important;
 }
@@ -127,7 +196,6 @@ select:focus[data-flux-control] {
     color: rgba(255, 255, 255, 0.8) !important;
 }
 
-/* Sidebar profile section */
 [flux-sidebar] [data-flux-sidebar-profile] {
     color: rgba(255, 255, 255, 0.7) !important;
 }
@@ -137,108 +205,24 @@ select:focus[data-flux-control] {
     background-color: rgba(255, 255, 255, 0.06) !important;
 }
 
-/* Sidebar separator lines */
 [flux-sidebar] [data-flux-separator],
 [flux-sidebar] hr {
     border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* ===== HRMS Custom Styles ===== */
-
-/* Stat card hover effect */
-.hrms-stat-card {
-    @apply transition-all duration-200;
-}
-.hrms-stat-card:hover {
-    @apply shadow-lg -translate-y-0.5;
+/* ===== Flux field overrides ===== */
+[data-flux-field]:not(ui-radio, ui-checkbox) {
+    @apply grid gap-2;
 }
 
-/* Stat card icon container */
-.hrms-stat-icon {
-    @apply flex items-center justify-center w-10 h-10 rounded-lg;
+[data-flux-label] {
+    @apply !mb-0 !leading-tight;
 }
 
-/* Table row hover */
-.hrms-table tbody tr {
-    @apply transition-colors duration-150;
-}
-
-/* Badge refinements */
-.hrms-badge-success {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400;
-}
-.hrms-badge-danger {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400;
-}
-.hrms-badge-info {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
-}
-.hrms-badge-warning {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400;
-}
-.hrms-badge-neutral {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400;
-}
-.hrms-badge-purple {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400;
-}
-
-/* Page section header */
-.hrms-section-header {
-    @apply border-b border-zinc-200 dark:border-zinc-700 pb-4 mb-6;
-}
-
-/* Form card styling */
-.hrms-form-card {
-    @apply bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm p-6;
-}
-
-/* Content card */
-.hrms-card {
-    @apply bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden;
-}
-.hrms-card-body {
-    @apply p-5 sm:p-6;
-}
-
-/* Card inner list rows — more breathing room for show pages */
-.hrms-card .hrms-list-row {
-    @apply py-3 px-1;
-}
-.hrms-card .hrms-list-row:first-child {
-    @apply pt-1;
-}
-.hrms-card .hrms-list-row:last-child {
-    @apply border-0;
-}
-
-/* Action button group — consistent gap and padding */
-.hrms-actions {
-    @apply flex flex-wrap items-center gap-2;
-}
-
-/* Auth split layout left panel gradient */
-.hrms-auth-gradient {
-    background: linear-gradient(135deg, #0c1222 0%, #1e3a8a 50%, #2563eb 100%);
-}
-.dark .hrms-auth-gradient {
-    background: linear-gradient(135deg, #0c1222 0%, #0f1629 50%, #1e3a8a 100%);
-}
-
-/* Empty state */
-.hrms-empty-state {
-    @apply flex flex-col items-center justify-center py-12 text-center;
-}
-.hrms-empty-state-icon {
-    @apply w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4;
-}
-
-/* Line clamp utility */
-.line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+input:focus[data-flux-control],
+textarea:focus[data-flux-control],
+select:focus[data-flux-control] {
+    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
 
 /* ===== Auth Card Dark Theme ===== */
@@ -264,4 +248,12 @@ select:focus[data-flux-control] {
 
 [data-flux-checkbox]:checked {
     @apply bg-hrms-600 border-hrms-600;
+}
+
+/* ===== Line clamp utility ===== */
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }

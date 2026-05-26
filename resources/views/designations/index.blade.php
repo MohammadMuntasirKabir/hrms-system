@@ -83,15 +83,11 @@
                                 </flux:table.cell>
                                 <flux:table.cell>
                                     <div class="hrms-actions justify-end">
-                                        @can('designations.edit')
-                                            <flux:button :href="route('designations.edit', $designation)" size="xs" variant="outline" icon="pencil" wire:navigate>{{ __('Edit') }}</flux:button>
-                                        @endcan
-                                        @if ($designation->users_count == 0 && auth()->user()->can('designations.delete'))
-                                            <form method="POST" action="{{ route('designations.destroy', $designation) }}" class="inline">
-                                                @csrf @method('DELETE')
-                                                <flux:button type="submit" size="xs" variant="danger" icon="trash" onclick="return confirm('{{ __('Delete this designation?') }}')">{{ __('Delete') }}</flux:button>
-                                            </form>
-                                        @endif
+                                        <flux:button :href="route('designations.edit', $designation)" size="xs" variant="outline" icon="pencil" wire:navigate>{{ __('Edit') }}</flux:button>
+                                        <form method="POST" action="{{ route('designations.destroy', $designation) }}" class="inline">
+                                            @csrf @method('DELETE')
+                                            <flux:button type="submit" size="xs" variant="danger" icon="trash" onclick="return confirm('{{ __('Delete this designation?') }}')">{{ __('Delete') }}</flux:button>
+                                        </form>
                                     </div>
                                 </flux:table.cell>
                             </flux:table.row>

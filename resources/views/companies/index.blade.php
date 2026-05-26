@@ -41,6 +41,9 @@
                                 <flux:table.cell>
                                     <div class="hrms-actions justify-end">
                                         <flux:button :href="route('companies.show', $company)" size="xs" variant="outline" icon="eye" wire:navigate>{{ __('View') }}</flux:button>
+                                        @can('companies.edit')
+                                            <flux:button :href="route('companies.edit', $company)" size="xs" variant="outline" icon="pencil" wire:navigate>{{ __('Edit') }}</flux:button>
+                                        @endcan
                                     </div>
                                 </flux:table.cell>
                             </flux:table.row>
