@@ -17,7 +17,7 @@ class UserManagementController extends Controller
 {
     private function authorizeCompany(Request $request, Company $company): void
     {
-        if (!$request->user()->canViewCompany($company)) {
+        if (! $request->user()->canViewCompany($company)) {
             abort(403);
         }
     }
@@ -25,6 +25,7 @@ class UserManagementController extends Controller
     private function getCompanyFilter(Request $request): ?int
     {
         $companyId = $request->input('company_id') ?? session('filter_company_id');
+
         return $companyId ? (int) $companyId : null;
     }
 
@@ -35,7 +36,7 @@ class UserManagementController extends Controller
 
         $query = User::with(['company', 'department', 'designation'])->withCount('contracts');
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->whereIn('company_id', $user->getAllowedCompanyIds());
         } elseif ($companyId) {
             $query->where('company_id', $companyId);
@@ -56,8 +57,8 @@ class UserManagementController extends Controller
             : [];
 
         $departments = Department::where('is_active', true)
-            ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -82,13 +83,13 @@ class UserManagementController extends Controller
             : Company::whereIn('id', $user->getAllowedCompanyIds())->orderBy('name')->get();
 
         $departments = Department::where('is_active', true)
-            ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $designations = Designation::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('level')
             ->orderBy('title')
             ->get();
@@ -117,7 +118,7 @@ class UserManagementController extends Controller
         $company = Company::findOrFail($validated['company_id']);
         $this->authorizeCompany($request, $company);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $validated['company_id'] = $user->company_id;
         }
 
@@ -136,18 +137,34 @@ class UserManagementController extends Controller
         $newUser->assignRole($validated['role']);
 
         return redirect()->route('users.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'User ' . $newUser->name . ' created successfully.');
+            ->with('status', 'User '.$newUser->name.' created successfully.');
+    }
+
+    public function show(Request $request, User $user): View
+    {
+        $currentUser = $request->user();
+
+        if (! $currentUser->canViewCompany($user->company)) {
+            abort(403);
+        }
+
+        $user->load(['company', 'department', 'designation', 'contracts', 'salaries']);
+
+        return view('users.show', [
+            'user' => $user,
+            'currentUser' => $currentUser,
+        ]);
     }
 
     public function edit(Request $request, User $user): View
     {
         $currentUser = $request->user();
 
-        if (!$currentUser->canViewCompany($user->company)) {
+        if (! $currentUser->canViewCompany($user->company)) {
             abort(403);
         }
 
-        if (!$currentUser->isSeniorMember() && $currentUser->id !== $user->id) {
+        if (! $currentUser->isSeniorMember() && $currentUser->id !== $user->id) {
             abort(403);
         }
 
@@ -156,12 +173,12 @@ class UserManagementController extends Controller
             : Company::whereIn('id', $currentUser->getAllowedCompanyIds())->orderBy('name')->get();
 
         $departments = Department::where('is_active', true)
-            ->when(!$currentUser->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $currentUser->getAllowedCompanyIds()))
+            ->when(! $currentUser->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $currentUser->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $designations = Designation::where('is_active', true)
-            ->when(!$currentUser->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $currentUser->getAllowedCompanyIds()))
+            ->when(! $currentUser->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $currentUser->getAllowedCompanyIds()))
             ->orderBy('level')
             ->orderBy('title')
             ->get();
@@ -175,11 +192,11 @@ class UserManagementController extends Controller
     {
         $currentUser = $request->user();
 
-        if (!$currentUser->canViewCompany($user->company)) {
+        if (! $currentUser->canViewCompany($user->company)) {
             abort(403);
         }
 
-        if (!$currentUser->isSeniorMember() && $currentUser->id !== $user->id) {
+        if (! $currentUser->isSeniorMember() && $currentUser->id !== $user->id) {
             abort(403);
         }
 
@@ -195,11 +212,11 @@ class UserManagementController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        if (!$currentUser->isSuperAdmin()) {
+        if (! $currentUser->isSuperAdmin()) {
             $validated['company_id'] = $currentUser->company_id;
         }
 
-        if (!$currentUser->isSeniorMember()) {
+        if (! $currentUser->isSeniorMember()) {
             unset($validated['role']);
         }
 
@@ -226,18 +243,18 @@ class UserManagementController extends Controller
         }
 
         return redirect()->route('users.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'User ' . $user->name . ' updated successfully.');
+            ->with('status', 'User '.$user->name.' updated successfully.');
     }
 
     public function destroy(Request $request, User $user): RedirectResponse
     {
         $currentUser = $request->user();
 
-        if (!$currentUser->isSeniorMember()) {
+        if (! $currentUser->isSeniorMember()) {
             abort(403);
         }
 
-        if (!$currentUser->canViewCompany($user->company)) {
+        if (! $currentUser->canViewCompany($user->company)) {
             abort(403);
         }
 
@@ -252,7 +269,7 @@ class UserManagementController extends Controller
         $user->delete();
 
         return redirect()->route('users.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'User ' . $name . ' deleted.');
+            ->with('status', 'User '.$name.' deleted.');
     }
 
     private function getAssignableRoles(User $user): array

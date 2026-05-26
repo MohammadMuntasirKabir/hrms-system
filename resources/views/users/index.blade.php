@@ -107,7 +107,7 @@
                                     @endif
                                 </flux:table.cell>
                                 <flux:table.cell>
-                                    <div class="flex gap-2 justify-end">
+                                    <div class="hrms-actions justify-end">
                                         @if ($currentUser->can('users.edit'))
                                             <flux:button :href="route('users.edit', $user)" size="xs" variant="outline" icon="pencil" wire:navigate>{{ __('Edit') }}</flux:button>
                                         @endif

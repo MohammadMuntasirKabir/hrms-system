@@ -105,11 +105,27 @@
 
             <!-- Sidebar -->
             <div class="space-y-4">
-                <!-- Hire / Reject Actions -->
+                <!-- Hire / Shortlist / Review / Reject Actions -->
                 @if (!$applicant->isHired() && !$applicant->isRejected() && auth()->user()->isSeniorMember())
                     <div class="hrms-card">
                         <div class="hrms-card-body">
                             <flux:heading size="md" class="mb-4 text-zinc-900 dark:text-white">{{ __('Actions') }}</flux:heading>
+
+                            <!-- Review / Shortlist buttons -->
+                            <div class="hrms-actions mb-4">
+                                @if ($applicant->status === 'pending')
+                                    <form method="POST" action="{{ route('applicants.review', $applicant) }}" class="flex-1">
+                                        @csrf
+                                        <flux:button type="submit" variant="outline" icon="eye" class="w-full">{{ __('Mark as Reviewing') }}</flux:button>
+                                    </form>
+                                @endif
+                                @if (in_array($applicant->status, ['pending', 'reviewing']))
+                                    <form method="POST" action="{{ route('applicants.shortlist', $applicant) }}" class="flex-1">
+                                        @csrf
+                                        <flux:button type="submit" variant="primary" icon="star" class="w-full">{{ __('Shortlist') }}</flux:button>
+                                    </form>
+                                @endif
+                            </div>
 
                             <!-- Hire Form -->
                             <form method="POST" action="{{ route('applicants.hire', $applicant) }}" class="flex flex-col gap-4 mb-4">
@@ -138,7 +154,7 @@
                                     <flux:input name="end_date" :label="__('End Date')" type="date" :value="old('end_date')" />
                                 </div>
                                 <flux:input name="salary" :label="__('Salary')" type="number" step="0.01" :value="old('salary', $applicant->expected_salary)" placeholder="0.00" />
-                                <flux:button type="submit" variant="primary" icon="check" class="w-full">{{ __('Hire as Employee') }}</flux:button>
+                                <flux:button type="submit" variant="success" icon="check" class="w-full">{{ __('Hire as Employee') }}</flux:button>
                             </form>
 
                             <flux:separator class="my-4" />
@@ -151,19 +167,52 @@
                         </div>
                     </div>
                 @elseif ($applicant->isHired())
-                    <div class="rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 p-4 flex items-center gap-3">
-                        <flux:icon name="check-circle" class="size-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        <div>
-                            <p class="text-sm font-medium text-emerald-700 dark:text-emerald-300">{{ __('Hired') }}</p>
-                            <p class="text-xs text-emerald-600 dark:text-emerald-400">{{ $applicant->reviewed_at?->format('M d, Y') }}</p>
+                    <div class="hrms-card">
+                        <div class="hrms-card-body">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+                                    <flux:icon name="check-circle" class="size-5 text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-emerald-700 dark:text-emerald-300">{{ __('Hired') }}</p>
+                                    <p class="text-xs text-emerald-600 dark:text-emerald-400">{{ $applicant->reviewed_at?->format('M d, Y H:i') }}</p>
+                                </div>
+                            </div>
+                            @if ($applicant->hiredAsUser)
+                                <flux:button :href="route('users.show', $applicant->hiredAsUser)" variant="primary" icon="user" class="w-full mb-3" wire:navigate>{{ __('View Employee Profile') }}</flux:button>
+                            @endif
+                            @if ($applicant->updated_at->gte(now()->subDay()) && auth()->user()->isSeniorMember())
+                                <flux:separator class="my-3" />
+                                <form method="POST" action="{{ route('applicants.undo-hire', $applicant) }}">
+                                    @csrf
+                                    <flux:button type="submit" variant="outline" icon="arrow-uturn-left" class="w-full" onclick="return confirm('{{ __('Undo this hire? The employee, contract, and salary records will be deleted.') }}')">{{ __('Undo Hire') }}</flux:button>
+                                </form>
+                                <p class="text-xs text-zinc-400 mt-2 text-center">{{ __('You have 24 hours to undo this hire.') }}</p>
+                            @endif
                         </div>
                     </div>
                 @elseif ($applicant->isRejected())
-                    <div class="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4 flex items-center gap-3">
-                        <flux:icon name="x-mark" class="size-5 text-red-600 dark:text-red-400 shrink-0" />
-                        <div>
-                            <p class="text-sm font-medium text-red-700 dark:text-red-300">{{ __('Rejected') }}</p>
-                            <p class="text-xs text-red-600 dark:text-red-400">{{ $applicant->reviewed_at?->format('M d, Y') }}</p>
+                    <div class="hrms-card">
+                        <div class="hrms-card-body">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/30 flex items-center justify-center">
+                                    <flux:icon name="x-mark" class="size-5 text-red-600 dark:text-red-400" />
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-red-700 dark:text-red-300">{{ __('Rejected') }}</p>
+                                    <p class="text-xs text-red-600 dark:text-red-400">{{ $applicant->reviewed_at?->format('M d, Y H:i') }}</p>
+                                </div>
+                            </div>
+                            <div class="hrms-actions flex-col">
+                                <form method="POST" action="{{ route('applicants.undo-reject', $applicant) }}">
+                                    @csrf
+                                    <flux:button type="submit" variant="outline" icon="arrow-uturn-left" class="w-full">{{ __('Undo Rejection') }}</flux:button>
+                                </form>
+                                <form method="POST" action="{{ route('applicants.force-delete', $applicant) }}">
+                                    @csrf @method('DELETE')
+                                    <flux:button type="submit" variant="danger" icon="trash" class="w-full" onclick="return confirm('{{ __('Permanently delete this applicant? This cannot be undone.') }}')">{{ __('Delete Permanently') }}</flux:button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 @endif

@@ -14,6 +14,7 @@ Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
     }
+
     return redirect()->route('login');
 });
 
@@ -61,6 +62,11 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         Route::delete('/applicants/{applicant}', [ApplicantController::class, 'destroy'])->middleware('permission:applicants.create')->name('applicants.destroy');
         Route::post('/applicants/{applicant}/hire', [ApplicantController::class, 'hire'])->middleware('permission:applicants.hire')->name('applicants.hire');
         Route::post('/applicants/{applicant}/reject', [ApplicantController::class, 'reject'])->middleware('permission:applicants.reject')->name('applicants.reject');
+        Route::post('/applicants/{applicant}/shortlist', [ApplicantController::class, 'shortlist'])->middleware('permission:applicants.hire')->name('applicants.shortlist');
+        Route::post('/applicants/{applicant}/review', [ApplicantController::class, 'review'])->middleware('permission:applicants.hire')->name('applicants.review');
+        Route::post('/applicants/{applicant}/undo-hire', [ApplicantController::class, 'undoHire'])->middleware('permission:applicants.hire')->name('applicants.undo-hire');
+        Route::post('/applicants/{applicant}/undo-reject', [ApplicantController::class, 'undoReject'])->middleware('permission:applicants.reject')->name('applicants.undo-reject');
+        Route::delete('/applicants/{applicant}/force-delete', [ApplicantController::class, 'forceDelete'])->middleware('permission:applicants.reject')->name('applicants.force-delete');
     });
 
     // Employees
@@ -68,6 +74,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
         Route::get('/users/create', [UserManagementController::class, 'create'])->name('users.create');
         Route::post('/users', [UserManagementController::class, 'store'])->middleware('permission:users.create')->name('users.store');
+        Route::get('/users/{user}', [UserManagementController::class, 'show'])->name('users.show');
         Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserManagementController::class, 'update'])->middleware('permission:users.edit')->name('users.update');
         Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->middleware('permission:users.delete')->name('users.destroy');

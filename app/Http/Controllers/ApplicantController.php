@@ -18,7 +18,7 @@ class ApplicantController extends Controller
 {
     private function authorizeCompany(Request $request, Company $company): void
     {
-        if (!$request->user()->canViewCompany($company)) {
+        if (! $request->user()->canViewCompany($company)) {
             abort(403);
         }
     }
@@ -26,6 +26,7 @@ class ApplicantController extends Controller
     private function getCompanyFilter(Request $request): ?int
     {
         $companyId = $request->input('company_id') ?? session('filter_company_id');
+
         return $companyId ? (int) $companyId : null;
     }
 
@@ -36,7 +37,7 @@ class ApplicantController extends Controller
 
         $query = JobApplicant::with(['company', 'department', 'designation']);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->whereIn('company_id', $user->getAllowedCompanyIds());
         } elseif ($companyId) {
             $query->where('company_id', $companyId);
@@ -44,6 +45,16 @@ class ApplicantController extends Controller
 
         if ($request->filled('status') && in_array($request->status, ['pending', 'reviewing', 'shortlisted', 'hired', 'rejected'])) {
             $query->where('status', $request->status);
+        } else {
+            // By default, hide rejected applicants entirely.
+            // Hired applicants are shown only if hired within the last 24 hours (grace period to undo).
+            $query->where(function ($q) {
+                $q->where('status', '!=', 'rejected')
+                    ->where(function ($q2) {
+                        $q2->where('status', '!=', 'hired')
+                            ->orWhere('updated_at', '>=', now()->subDay());
+                    });
+            });
         }
 
         if ($request->filled('department_id')) {
@@ -57,8 +68,8 @@ class ApplicantController extends Controller
             : [];
 
         $departments = Department::where('is_active', true)
-            ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -92,13 +103,13 @@ class ApplicantController extends Controller
             : Company::whereIn('id', $user->getAllowedCompanyIds())->orderBy('name')->get();
 
         $departments = Department::where('is_active', true)
-            ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $designations = Designation::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('title')
             ->get();
 
@@ -131,7 +142,7 @@ class ApplicantController extends Controller
         $company = Company::findOrFail($validated['company_id']);
         $this->authorizeCompany($request, $company);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $validated['company_id'] = $user->company_id;
         }
 
@@ -141,7 +152,7 @@ class ApplicantController extends Controller
         $applicant = JobApplicant::create($validated);
 
         return redirect()->route('applicants.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Applicant ' . $applicant->full_name . ' added successfully.');
+            ->with('status', 'Applicant '.$applicant->full_name.' added successfully.');
     }
 
     public function show(Request $request, JobApplicant $applicant): View
@@ -167,12 +178,12 @@ class ApplicantController extends Controller
             : Company::whereIn('id', $user->getAllowedCompanyIds())->orderBy('name')->get();
 
         $departments = Department::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $designations = Designation::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('title')
             ->get();
 
@@ -187,7 +198,7 @@ class ApplicantController extends Controller
         $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:job_applicants,email,' . $applicant->id],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:job_applicants,email,'.$applicant->id],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -204,7 +215,7 @@ class ApplicantController extends Controller
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $validated['company_id'] = $user->company_id;
         }
 
@@ -217,7 +228,7 @@ class ApplicantController extends Controller
         $applicant->update($validated);
 
         return redirect()->route('applicants.show', $applicant)
-            ->with('status', 'Applicant ' . $applicant->full_name . ' updated successfully.');
+            ->with('status', 'Applicant '.$applicant->full_name.' updated successfully.');
     }
 
     public function destroy(Request $request, JobApplicant $applicant): RedirectResponse
@@ -229,7 +240,7 @@ class ApplicantController extends Controller
         $applicant->delete();
 
         return redirect()->route('applicants.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Applicant ' . $name . ' deleted.');
+            ->with('status', 'Applicant '.$name.' deleted.');
     }
 
     /**
@@ -292,7 +303,7 @@ class ApplicantController extends Controller
         ]);
 
         // Create salary record if salary provided
-        if (!empty($validated['salary'])) {
+        if (! empty($validated['salary'])) {
             Salary::create([
                 'user_id' => $employee->id,
                 'company_id' => $applicant->company_id,
@@ -320,7 +331,7 @@ class ApplicantController extends Controller
         ]);
 
         return redirect()->route('users.show', $employee)
-            ->with('status', 'Applicant ' . $applicant->full_name . ' has been hired as ' . $employee->name . '. A new employee record has been created with contract and salary.');
+            ->with('status', 'Applicant '.$applicant->full_name.' has been hired as '.$employee->name.'. A new employee record has been created with contract and salary.');
     }
 
     /**
@@ -343,7 +354,149 @@ class ApplicantController extends Controller
         ]);
 
         return redirect()->route('applicants.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Applicant ' . $applicant->full_name . ' has been rejected.');
+            ->with('status', 'Applicant '.$applicant->full_name.' has been rejected.');
+    }
+
+    /**
+     * Shortlist an applicant.
+     */
+    public function shortlist(Request $request, JobApplicant $applicant): RedirectResponse
+    {
+        $user = $request->user();
+        $this->authorizeCompany($request, $applicant->company);
+
+        if ($applicant->isHired()) {
+            return redirect()->route('applicants.show', $applicant)
+                ->with('error', 'This applicant has already been hired.');
+        }
+
+        if ($applicant->isRejected()) {
+            return redirect()->route('applicants.show', $applicant)
+                ->with('error', 'Cannot shortlist a rejected applicant.');
+        }
+
+        $applicant->update([
+            'status' => 'shortlisted',
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
+        ]);
+
+        return redirect()->route('applicants.show', $applicant)
+            ->with('status', 'Applicant '.$applicant->full_name.' has been shortlisted.');
+    }
+
+    /**
+     * Mark an applicant as reviewing.
+     */
+    public function review(Request $request, JobApplicant $applicant): RedirectResponse
+    {
+        $user = $request->user();
+        $this->authorizeCompany($request, $applicant->company);
+
+        if ($applicant->isHired()) {
+            return redirect()->route('applicants.show', $applicant)
+                ->with('error', 'This applicant has already been hired.');
+        }
+
+        if ($applicant->isRejected()) {
+            return redirect()->route('applicants.show', $applicant)
+                ->with('error', 'Cannot review a rejected applicant.');
+        }
+
+        $applicant->update([
+            'status' => 'reviewing',
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
+        ]);
+
+        return redirect()->route('applicants.show', $applicant)
+            ->with('status', 'Applicant '.$applicant->full_name.' is now under review.');
+    }
+
+    /**
+     * Undo a recent hire — reverts employee back to pending applicant.
+     * Only works within the 24-hour grace period.
+     */
+    public function undoHire(Request $request, JobApplicant $applicant): RedirectResponse
+    {
+        $user = $request->user();
+        $this->authorizeCompany($request, $applicant->company);
+
+        if (! $applicant->isHired()) {
+            return redirect()->route('applicants.show', $applicant)
+                ->with('error', 'This applicant is not hired.');
+        }
+
+        // Only allow undo within 24 hours
+        if ($applicant->updated_at->lt(now()->subDay())) {
+            return redirect()->route('applicants.show', $applicant)
+                ->with('error', 'The 24-hour grace period to undo this hire has expired. The applicant is now a full employee.');
+        }
+
+        // Delete the created employee, contract, and salary records
+        if ($applicant->hired_as_user_id) {
+            $employee = User::find($applicant->hired_as_user_id);
+            if ($employee) {
+                Contract::where('user_id', $employee->id)->delete();
+                Salary::where('user_id', $employee->id)->delete();
+                $employee->delete();
+            }
+        }
+
+        $applicant->update([
+            'status' => 'pending',
+            'reviewed_by' => null,
+            'reviewed_at' => null,
+            'hired_as_user_id' => null,
+        ]);
+
+        return redirect()->route('applicants.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
+            ->with('status', 'Hire undone. '.$applicant->full_name.' has been moved back to pending applicants.');
+    }
+
+    /**
+     * Undo rejection — move applicant back to pending.
+     */
+    public function undoReject(Request $request, JobApplicant $applicant): RedirectResponse
+    {
+        $user = $request->user();
+        $this->authorizeCompany($request, $applicant->company);
+
+        if (! $applicant->isRejected()) {
+            return redirect()->route('applicants.show', $applicant)
+                ->with('error', 'This applicant is not rejected.');
+        }
+
+        $applicant->update([
+            'status' => 'pending',
+            'reviewed_by' => null,
+            'reviewed_at' => null,
+        ]);
+
+        return redirect()->route('applicants.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
+            ->with('status', 'Applicant '.$applicant->full_name.' has been moved back to pending.');
+    }
+
+    /**
+     * Permanently delete a rejected applicant.
+     */
+    public function forceDelete(Request $request, JobApplicant $applicant): RedirectResponse
+    {
+        $user = $request->user();
+        $this->authorizeCompany($request, $applicant->company);
+
+        if (! $applicant->isRejected()) {
+            return redirect()->route('applicants.show', $applicant)
+                ->with('error', 'Only rejected applicants can be permanently deleted.');
+        }
+
+        $name = $applicant->full_name;
+        $applicant->delete();
+
+        return redirect()->route('applicants.index', array_merge(
+            $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [],
+            ['status' => 'rejected']
+        ))->with('status', 'Applicant '.$name.' has been permanently deleted.');
     }
 
     private function generateEmployeeId(int $companyId): string
@@ -358,6 +511,6 @@ class ApplicantController extends Controller
             $next = (int) $matches[1] + 1;
         }
 
-        return 'EMP-' . str_pad($next, 3, '0', STR_PAD_LEFT);
+        return 'EMP-'.str_pad($next, 3, '0', STR_PAD_LEFT);
     }
 }

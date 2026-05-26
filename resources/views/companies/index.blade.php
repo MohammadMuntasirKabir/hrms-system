@@ -39,7 +39,7 @@
                                     @else<span class="hrms-badge-danger">{{ __('Inactive') }}</span>@endif
                                 </flux:table.cell>
                                 <flux:table.cell>
-                                    <div class="flex gap-2 justify-end">
+                                    <div class="hrms-actions justify-end">
                                         <flux:button :href="route('companies.show', $company)" size="xs" variant="outline" icon="eye" wire:navigate>{{ __('View') }}</flux:button>
                                     </div>
                                 </flux:table.cell>

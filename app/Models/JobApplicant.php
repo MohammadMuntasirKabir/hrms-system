@@ -72,7 +72,7 @@ class JobApplicant extends Model
 
     public function getFullNameAttribute(): string
     {
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->first_name.' '.$this->last_name;
     }
 
     public function isHired(): bool
@@ -83,6 +83,16 @@ class JobApplicant extends Model
     public function isPending(): bool
     {
         return $this->status === 'pending';
+    }
+
+    public function isReviewing(): bool
+    {
+        return $this->status === 'reviewing';
+    }
+
+    public function isShortlisted(): bool
+    {
+        return $this->status === 'shortlisted';
     }
 
     public function isRejected(): bool

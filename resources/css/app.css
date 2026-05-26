@@ -198,7 +198,23 @@ select:focus[data-flux-control] {
     @apply bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden;
 }
 .hrms-card-body {
-    @apply p-5;
+    @apply p-5 sm:p-6;
+}
+
+/* Card inner list rows — more breathing room for show pages */
+.hrms-card .hrms-list-row {
+    @apply py-3 px-1;
+}
+.hrms-card .hrms-list-row:first-child {
+    @apply pt-1;
+}
+.hrms-card .hrms-list-row:last-child {
+    @apply border-0;
+}
+
+/* Action button group — consistent gap and padding */
+.hrms-actions {
+    @apply flex flex-wrap items-center gap-2;
 }
 
 /* Auth split layout left panel gradient */

@@ -60,20 +60,20 @@
             <!-- Departments -->
             <div class="hrms-card">
                 <div class="hrms-card-body">
-                    <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center justify-between mb-4">
                         <flux:heading size="md" class="text-zinc-900 dark:text-white">{{ __('Departments') }}</flux:heading>
                         <flux:button :href="route('departments.index')" size="xs" variant="outline" icon="arrow-right" wire:navigate>{{ __('View All') }}</flux:button>
                     </div>
                     @forelse ($departments as $dept)
-                        <div class="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                        <div class="hrms-list-row flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
                             <a href="{{ route('departments.show', $dept) }}" class="font-medium text-hrms-600 dark:text-hrms-400 hover:underline text-sm" wire:navigate>{{ $dept->name }}</a>
-                            <div class="flex gap-2">
-                                <span class="hrms-badge-info text-xs">{{ $dept->users_count }} {{ __('emp') }}</span>
-                                <span class="hrms-badge-neutral text-xs">{{ $dept->designations_count }} {{ __('desig') }}</span>
+                            <div class="hrms-actions">
+                                <span class="hrms-badge-info text-xs px-2 py-0.5">{{ $dept->users_count }} {{ __('emp') }}</span>
+                                <span class="hrms-badge-neutral text-xs px-2 py-0.5">{{ $dept->designations_count }} {{ __('desig') }}</span>
                             </div>
                         </div>
                     @empty
-                        <div class="text-center py-4 text-zinc-400 text-sm">{{ __('No departments yet.') }}</div>
+                        <div class="text-center py-6 text-zinc-400 text-sm">{{ __('No departments yet.') }}</div>
                     @endforelse
                 </div>
             </div>
@@ -81,22 +81,22 @@
             <!-- Designations -->
             <div class="hrms-card">
                 <div class="hrms-card-body">
-                    <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center justify-between mb-4">
                         <flux:heading size="md" class="text-zinc-900 dark:text-white">{{ __('Designations') }}</flux:heading>
                         <flux:button :href="route('designations.index')" size="xs" variant="outline" icon="arrow-right" wire:navigate>{{ __('View All') }}</flux:button>
                     </div>
                     @forelse ($designations as $desig)
-                        <div class="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                        <div class="hrms-list-row flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
                             <div>
                                 <span class="font-medium text-sm text-zinc-900 dark:text-white">{{ $desig->title }}</span>
                                 @if ($desig->department)
                                     <span class="text-xs text-zinc-400 ml-1">· {{ $desig->department->name }}</span>
                                 @endif
                             </div>
-                            <span class="hrms-badge-neutral text-xs">{{ $desig->users_count }} {{ __('emp') }}</span>
+                            <span class="hrms-badge-neutral text-xs px-2 py-0.5">{{ $desig->users_count }} {{ __('emp') }}</span>
                         </div>
                     @empty
-                        <div class="text-center py-4 text-zinc-400 text-sm">{{ __('No designations yet.') }}</div>
+                        <div class="text-center py-6 text-zinc-400 text-sm">{{ __('No designations yet.') }}</div>
                     @endforelse
                 </div>
             </div>
@@ -106,7 +106,7 @@
         @if ($contracts->count() > 0)
             <div class="hrms-card">
                 <div class="hrms-card-body">
-                    <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center justify-between mb-4">
                         <flux:heading size="md" class="text-zinc-900 dark:text-white">{{ __('Recent Contracts') }}</flux:heading>
                         <flux:button :href="route('contracts.index')" size="xs" variant="outline" icon="arrow-right" wire:navigate>{{ __('View All') }}</flux:button>
                     </div>
@@ -136,7 +136,9 @@
                                             @else<span class="hrms-badge-neutral text-xs">{{ ucfirst($c->status) }}</span>@endif
                                         </flux:table.cell>
                                         <flux:table.cell>
-                                            <flux:button :href="route('contracts.show', $c)" size="xs" variant="outline" icon="eye" wire:navigate>{{ __('View') }}</flux:button>
+                                            <div class="hrms-actions justify-end">
+                                                <flux:button :href="route('contracts.show', $c)" size="xs" variant="outline" icon="eye" wire:navigate>{{ __('View') }}</flux:button>
+                                            </div>
                                         </flux:table.cell>
                                     </flux:table.row>
                                 @endforeach

@@ -107,7 +107,7 @@
                                     @endif
                                 </flux:table.cell>
                                 <flux:table.cell>
-                                    <div class="flex gap-2 justify-end">
+                                    <div class="hrms-actions justify-end">
                                         <flux:button :href="route('contracts.show', $contract)" size="xs" variant="outline" icon="eye" wire:navigate>{{ __('View') }}</flux:button>
                                         @can('contracts.edit')
                                             <flux:button :href="route('contracts.edit', $contract)" size="xs" variant="outline" icon="pencil" wire:navigate>{{ __('Edit') }}</flux:button>

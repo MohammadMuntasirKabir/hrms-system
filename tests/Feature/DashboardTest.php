@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Company;
 use App\Models\User;
+use Database\Seeders\RolePermissionSeeder;
 
 test('guests are redirected to the login page', function () {
     $response = $this->get(route('dashboard'));
@@ -8,7 +10,10 @@ test('guests are redirected to the login page', function () {
 });
 
 test('authenticated users can visit the dashboard', function () {
-    $user = User::factory()->create();
+    $this->seed(RolePermissionSeeder::class);
+    $company = Company::factory()->create();
+    $user = User::factory()->create(['company_id' => $company->id]);
+    $user->assignRole('employee');
     $this->actingAs($user);
 
     $response = $this->get(route('dashboard'));

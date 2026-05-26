@@ -6,7 +6,7 @@
                 <flux:heading size="xl" class="text-zinc-900 dark:text-white">{{ $department->name }}</flux:heading>
                 <flux:subheading class="text-zinc-500 dark:text-zinc-400">{{ $department->code ? $department->code . ' · ' : '' }}{{ $department->company?->name ?? '—' }}</flux:subheading>
             </div>
-            <div class="flex gap-2">
+            <div class="hrms-actions">
                 @can('departments.edit')
                     <flux:button :href="route('departments.edit', $department)" variant="outline" icon="pencil" wire:navigate>{{ __('Edit') }}</flux:button>
                 @endcan
@@ -65,9 +65,9 @@
             <!-- Employees -->
             <div class="hrms-card">
                 <div class="hrms-card-body">
-                    <flux:heading size="md" class="mb-3 text-zinc-900 dark:text-white">{{ __('Employees') }}</flux:heading>
+                    <flux:heading size="md" class="mb-4 text-zinc-900 dark:text-white">{{ __('Employees') }}</flux:heading>
                     @forelse ($employees as $emp)
-                        <div class="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                        <div class="hrms-list-row flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
                             <div class="flex items-center gap-3">
                                 <flux:avatar :name="$emp->name" size="xs" />
                                 <div>
@@ -75,11 +75,13 @@
                                     <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $emp->designation?->title ?? '—' }}</div>
                                 </div>
                             </div>
-                            @if ($emp->activeContract)
-                                <span class="hrms-badge-success text-xs">{{ ucwords(str_replace('_', ' ', $emp->activeContract->contract_type)) }}</span>
-                            @else
-                                <span class="hrms-badge-neutral text-xs">{{ __('No contract') }}</span>
-                            @endif
+                            <div class="hrms-actions">
+                                @if ($emp->activeContract)
+                                    <span class="hrms-badge-success text-xs px-2 py-0.5">{{ ucwords(str_replace('_', ' ', $emp->activeContract->contract_type)) }}</span>
+                                @else
+                                    <span class="hrms-badge-neutral text-xs px-2 py-0.5">{{ __('No contract') }}</span>
+                                @endif
+                            </div>
                         </div>
                     @empty
                         <div class="text-center py-6 text-zinc-400 text-sm">{{ __('No employees in this department.') }}</div>
@@ -95,14 +97,14 @@
             <!-- Designations -->
             <div class="hrms-card">
                 <div class="hrms-card-body">
-                    <flux:heading size="md" class="mb-3 text-zinc-900 dark:text-white">{{ __('Designations') }}</flux:heading>
+                    <flux:heading size="md" class="mb-4 text-zinc-900 dark:text-white">{{ __('Designations') }}</flux:heading>
                     @forelse ($designations as $desig)
-                        <div class="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                        <div class="hrms-list-row flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
                             <div>
                                 <div class="text-sm font-medium text-zinc-900 dark:text-white">{{ $desig->title }}</div>
                                 <div class="text-xs text-zinc-500 dark:text-zinc-400">Level {{ $desig->level }}</div>
                             </div>
-                            <span class="hrms-badge-info text-xs">{{ $desig->users_count }} {{ __('employees') }}</span>
+                            <span class="hrms-badge-info text-xs px-2 py-0.5">{{ $desig->users_count }} {{ __('employees') }}</span>
                         </div>
                     @empty
                         <div class="text-center py-6 text-zinc-400 text-sm">{{ __('No designations in this department.') }}</div>
@@ -115,7 +117,7 @@
         @if ($contracts->count() > 0)
             <div class="hrms-card">
                 <div class="hrms-card-body">
-                    <flux:heading size="md" class="mb-3 text-zinc-900 dark:text-white">{{ __('Contracts') }}</flux:heading>
+                    <flux:heading size="md" class="mb-4 text-zinc-900 dark:text-white">{{ __('Contracts') }}</flux:heading>
                     <div class="overflow-x-auto">
                         <flux:table>
                             <flux:table.columns>
@@ -146,7 +148,9 @@
                                             @endif
                                         </flux:table.cell>
                                         <flux:table.cell>
-                                            <flux:button :href="route('contracts.show', $contract)" size="xs" variant="outline" icon="eye" wire:navigate>{{ __('View') }}</flux:button>
+                                            <div class="hrms-actions justify-end">
+                                                <flux:button :href="route('contracts.show', $contract)" size="xs" variant="outline" icon="eye" wire:navigate>{{ __('View') }}</flux:button>
+                                            </div>
                                         </flux:table.cell>
                                     </flux:table.row>
                                 @endforeach
@@ -161,7 +165,7 @@
         @if ($department->childDepartments->count() > 0)
             <div class="hrms-card">
                 <div class="hrms-card-body">
-                    <flux:heading size="md" class="mb-3 text-zinc-900 dark:text-white">{{ __('Sub-Departments') }}</flux:heading>
+                    <flux:heading size="md" class="mb-4 text-zinc-900 dark:text-white">{{ __('Sub-Departments') }}</flux:heading>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach ($department->childDepartments as $child)
                             <a href="{{ route('departments.show', $child) }}" class="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors" wire:navigate>

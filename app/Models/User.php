@@ -155,6 +155,7 @@ class User extends Authenticatable implements PasskeyUser
 
         // Check if user's company is a sub of the target (for viewing parent)
         $mainCompany = $this->company->getMainCompany();
+
         return $mainCompany->id === $company->id || $mainCompany->id === $company->parent_company_id;
     }
 
@@ -168,10 +169,14 @@ class User extends Authenticatable implements PasskeyUser
         }
 
         $company = $this->company;
+        if (! $company) {
+            return [];
+        }
+
         if ($company->isHq()) {
             return $company->getAllSubCompanyIds();
         }
 
-        return [$company->id, $company->parent_company_id];
+        return array_filter([$company->id, $company->parent_company_id]);
     }
 }

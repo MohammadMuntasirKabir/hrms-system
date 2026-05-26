@@ -120,8 +120,46 @@
                                     <span class="hrms-badge-{{ $statusColors[$applicant->status] ?? 'neutral' }}">{{ ucfirst($applicant->status) }}</span>
                                 </flux:table.cell>
                                 <flux:table.cell>
-                                    <div class="flex gap-2 justify-end">
-                                        <flux:button :href="route('applicants.show', $applicant)" size="xs" variant="outline" icon="eye" wire:navigate>{{ __('View') }}</flux:button>
+                                    <div class="hrms-actions justify-end">
+                                        @if ($applicant->isRejected())
+                                            {{-- Rejected: Undo or Permanently Delete --}}
+                                            <form method="POST" action="{{ route('applicants.undo-reject', $applicant) }}" class="inline">
+                                                @csrf
+                                                <flux:button type="submit" size="xs" variant="outline" icon="arrow-uturn-left" title="{{ __('Undo Rejection') }}">{{ __('Undo') }}</flux:button>
+                                            </form>
+                                            <form method="POST" action="{{ route('applicants.force-delete', $applicant) }}" class="inline">
+                                                @csrf @method('DELETE')
+                                                <flux:button type="submit" size="xs" variant="danger" icon="trash" title="{{ __('Permanently Delete') }}" onclick="return confirm('{{ __('Permanently delete this applicant? This cannot be undone.') }}')"></flux:button>
+                                            </form>
+                                        @elseif ($applicant->isHired())
+                                            {{-- Hired: Undo (within 24h) or View Employee --}}
+                                            @if ($applicant->updated_at->gte(now()->subDay()))
+                                                <form method="POST" action="{{ route('applicants.undo-hire', $applicant) }}" class="inline">
+                                                    @csrf
+                                                    <flux:button type="submit" size="xs" variant="outline" icon="arrow-uturn-left" title="{{ __('Undo Hire') }}" onclick="return confirm('{{ __('Undo this hire? The employee record will be deleted.') }}')">{{ __('Undo Hire') }}</flux:button>
+                                                </form>
+                                            @endif
+                                            @if ($applicant->hiredAsUser)
+                                                <flux:button :href="route('users.show', $applicant->hiredAsUser)" size="xs" variant="success" icon="user" wire:navigate>{{ __('View Employee') }}</flux:button>
+                                            @endif
+                                        @else
+                                            {{-- Pending / Reviewing / Shortlisted: Review, Shortlist, View --}}
+                                            @if (auth()->user()->isSeniorMember())
+                                                @if ($applicant->isPending())
+                                                    <form method="POST" action="{{ route('applicants.review', $applicant) }}" class="inline">
+                                                        @csrf
+                                                        <flux:button type="submit" size="xs" variant="outline" icon="eye" title="{{ __('Mark as Reviewing') }}"></flux:button>
+                                                    </form>
+                                                @endif
+                                                @if (in_array($applicant->status, ['pending', 'reviewing']))
+                                                    <form method="POST" action="{{ route('applicants.shortlist', $applicant) }}" class="inline">
+                                                        @csrf
+                                                        <flux:button type="submit" size="xs" variant="primary" icon="star" title="{{ __('Shortlist') }}"></flux:button>
+                                                    </form>
+                                                @endif
+                                            @endif
+                                            <flux:button :href="route('applicants.show', $applicant)" size="xs" variant="outline" icon="eye" wire:navigate>{{ __('View') }}</flux:button>
+                                        @endif
                                     </div>
                                 </flux:table.cell>
                             </flux:table.row>
@@ -130,7 +168,15 @@
                                 <flux:table.cell colspan="7">
                                     <div class="hrms-empty-state py-12">
                                         <div class="hrms-empty-state-icon"><flux:icon name="user-plus" class="size-7 text-zinc-400 dark:text-zinc-600" /></div>
-                                        <flux:text class="text-zinc-500 dark:text-zinc-400 mb-1">{{ __('No applicants found.') }}</flux:text>
+                                        <flux:text class="text-zinc-500 dark:text-zinc-400 mb-1">
+                                            @if ($filterStatus === 'rejected')
+                                                {{ __('No rejected applicants.') }}
+                                            @elseif ($filterStatus === 'hired')
+                                                {{ __('No recently hired applicants. When you hire someone, they appear here for 24 hours so you can undo if needed.') }}
+                                            @else
+                                                {{ __('No applicants found.') }}
+                                            @endif
+                                        </flux:text>
                                     </div>
                                 </flux:table.cell>
                             </flux:table.row>
