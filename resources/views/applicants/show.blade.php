@@ -18,7 +18,7 @@
                 @endif
                 @if ($applicant->isHired() && $applicant->hiredAsUser)
                     <flux:button :href="route('users.show', $applicant->hiredAsUser)" variant="primary" icon="user" wire:navigate size="sm">{{ __('Employee') }}</flux:button>
-                @endif>
+                @endif
             </div>
         </div>
 
@@ -152,7 +152,7 @@
                                     <flux:input name="end_date" :label="__('End Date')" type="date" :value="old('end_date')" />
                                 </div>
                                 <flux:input name="salary" :label="__('Salary')" type="number" step="0.01" :value="old('salary', $applicant->expected_salary)" placeholder="0.00" />
-                                <flux:button type="submit" variant="success" icon="check" class="w-full">{{ __('Hire as Employee') }}</flux:button>
+                                <flux:button type="submit" variant="primary" icon="check" class="w-full">{{ __('Hire as Employee') }}</flux:button>
                             </form>
 
                             <flux:separator class="my-3" />

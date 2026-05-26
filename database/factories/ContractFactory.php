@@ -10,15 +10,16 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ContractFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'contract_type' => 'full_time',
+            'position' => fake()->jobTitle(),
+            'start_date' => fake()->dateTimeBetween('-1 year', 'now'),
+            'end_date' => fake()->optional(0.3)->dateTimeBetween('now', '+2 years'),
+            'salary' => fake()->numberBetween(30000, 150000),
+            'currency' => 'BDT',
+            'status' => 'active',
         ];
     }
 }

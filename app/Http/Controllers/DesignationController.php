@@ -96,7 +96,7 @@ class DesignationController extends Controller
         $company = Company::findOrFail($validated['company_id']);
         $this->authorizeCompany($request, $company);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $validated['company_id'] = $user->company_id;
         }
 
@@ -105,6 +105,19 @@ class DesignationController extends Controller
 
         return redirect()->route('designations.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
             ->with('status', 'Designation "' . $designation->title . '" created successfully.');
+    }
+
+    public function show(Request $request, Designation $designation): View
+    {
+        $user = $request->user();
+        $this->authorizeCompany($request, $designation->company);
+
+        $designation->load(['company', 'department'])->loadCount('users');
+
+        return view('designations.show', [
+            'designation' => $designation,
+            'currentUser' => $user,
+        ]);
     }
 
     public function edit(Request $request, Designation $designation): View

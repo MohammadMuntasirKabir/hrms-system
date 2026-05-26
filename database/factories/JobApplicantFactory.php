@@ -5,20 +5,25 @@ namespace Database\Factories;
 use App\Models\JobApplicant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<JobApplicant>
- */
 class JobApplicantFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'email' => fake()->unique()->safeEmail(),
+            'phone' => fake()->optional()->phoneNumber(),
+            'address' => fake()->optional()->address(),
+            'city' => fake()->optional()->city(),
+            'country' => fake()->countryCode(),
+            'cover_letter' => fake()->optional()->paragraph(),
+            'source' => fake()->randomElement(['Website', 'LinkedIn', 'Indeed', 'Referral']),
+            'expected_salary' => fake()->optional()->numberBetween(30000, 150000),
+            'currency' => 'BDT',
+            'available_from' => fake()->optional()->dateTimeBetween('now', '+3 months'),
+            'status' => fake()->randomElement(['pending', 'reviewing', 'shortlisted', 'hired', 'rejected']),
+            'notes' => fake()->optional()->sentence(),
         ];
     }
 }

@@ -5,20 +5,15 @@ namespace Database\Factories;
 use App\Models\Designation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Designation>
- */
 class DesignationFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'title' => fake()->unique()->jobTitle(),
+            'description' => fake()->optional()->sentence(),
+            'level' => fake()->numberBetween(0, 10),
+            'is_active' => true,
         ];
     }
 }

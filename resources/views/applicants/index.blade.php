@@ -147,7 +147,7 @@
                                                 </form>
                                             @endif
                                             @if ($applicant->hiredAsUser)
-                                                <flux:button :href="route('users.show', $applicant->hiredAsUser)" size="xs" variant="success" icon="user" wire:navigate>{{ __('Employee') }}</flux:button>
+                                                <flux:button :href="route('users.show', $applicant->hiredAsUser)" size="xs" variant="primary" icon="user" wire:navigate>{{ __('Employee') }}</flux:button>
                                             @endif
                                         @else
                                             @if (auth()->user()->isSeniorMember())
@@ -186,7 +186,7 @@
                                     </div>
                                 </flux:table.cell>
                             </flux:table.row>
-                        @endforelse>
+                        @endforelse
                     </flux:table.rows>
                 </flux:table>
             </div>

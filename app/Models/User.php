@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -80,14 +81,20 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(Salary::class);
     }
 
-    public function activeContract(): ?Contract
+    public function activeContract(): HasOne
     {
-        return $this->contracts()->where('status', 'active')->latest('start_date')->first();
+        return $this->hasOne(Contract::class)
+            ->where('status', 'active')
+            ->latest('start_date')
+            ->limit(1);
     }
 
-    public function activeSalary(): ?Salary
+    public function activeSalary(): HasOne
     {
-        return $this->salaries()->where('status', 'active')->latest('effective_from')->first();
+        return $this->hasOne(Salary::class)
+            ->where('status', 'active')
+            ->latest('effective_from')
+            ->limit(1);
     }
 
     // === Role checks ===
