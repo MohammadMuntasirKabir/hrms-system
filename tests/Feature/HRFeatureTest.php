@@ -1757,3 +1757,251 @@ test('applicant hire shows success message', function () {
         'role' => 'employee',
     ])->assertSessionHas('status');
 });
+
+// ============================================================
+// Admin Management Tests — Super Admin Transfer
+// ============================================================
+test('super admin can transfer super admin role to another user', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::where('id', $superAdmin->company_id)->first();
+    $newAdmin = User::factory()->create(['company_id' => $company->id]);
+
+    $this->actingAs($superAdmin)->post(route('admin.transfer-superadmin'), [
+        'new_superadmin_id' => $newAdmin->id,
+    ])->assertRedirect(route('users.index'));
+
+    // New user should now be super admin
+    expect($newAdmin->fresh()->isSuperAdmin())->toBeTrue();
+    // Old super admin should no longer be super admin
+    expect($superAdmin->fresh()->isSuperAdmin())->toBeFalse();
+});
+
+test('non-super admin cannot transfer super admin role', function () {
+    $user = createCompanyAdmin();
+    $target = User::factory()->create(['company_id' => $user->company_id]);
+
+    $this->actingAs($user)->post(route('admin.transfer-superadmin'), [
+        'new_superadmin_id' => $target->id,
+    ])->assertForbidden();
+});
+
+test('super admin cannot transfer to inactive user', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::where('id', $superAdmin->company_id)->first();
+    $inactiveUser = User::factory()->create(['company_id' => $company->id, 'is_active' => false]);
+
+    $this->actingAs($superAdmin)->post(route('admin.transfer-superadmin'), [
+        'new_superadmin_id' => $inactiveUser->id,
+    ])->assertSessionHas('error');
+
+    expect($superAdmin->fresh()->isSuperAdmin())->toBeTrue();
+    expect($inactiveUser->fresh()->isSuperAdmin())->toBeFalse();
+});
+
+test('super admin transfer requires valid user id', function () {
+    $superAdmin = createSuperAdmin();
+
+    $this->actingAs($superAdmin)->post(route('admin.transfer-superadmin'), [
+        'new_superadmin_id' => 99999,
+    ])->assertSessionHasErrors('new_superadmin_id');
+});
+
+// ============================================================
+// Admin Management Tests — Company Admin Assignment
+// ============================================================
+test('super admin can assign company admin to user', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::factory()->create();
+    $user = User::factory()->create(['company_id' => $company->id]);
+
+    $this->actingAs($superAdmin)->post(route('admin.assign-company-admin'), [
+        'user_id' => $user->id,
+    ])->assertSessionHas('status');
+
+    expect($user->fresh()->isCompanyAdmin())->toBeTrue();
+});
+
+test('non-super admin cannot assign company admin', function () {
+    $user = createCompanyAdmin();
+    $target = User::factory()->create(['company_id' => $user->company_id]);
+
+    $this->actingAs($user)->post(route('admin.assign-company-admin'), [
+        'user_id' => $target->id,
+    ])->assertForbidden();
+});
+
+test('cannot assign company admin if company already has one', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::factory()->create();
+    $existingAdmin = User::factory()->create(['company_id' => $company->id]);
+    $existingAdmin->assignRole('company_admin');
+
+    $newUser = User::factory()->create(['company_id' => $company->id]);
+
+    $this->actingAs($superAdmin)->post(route('admin.assign-company-admin'), [
+        'user_id' => $newUser->id,
+    ])->assertSessionHas('error');
+
+    expect($newUser->fresh()->isCompanyAdmin())->toBeFalse();
+    expect($existingAdmin->fresh()->isCompanyAdmin())->toBeTrue();
+});
+
+test('can reassign company admin by first removing existing one', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::factory()->create();
+    $oldAdmin = User::factory()->create(['company_id' => $company->id]);
+    $oldAdmin->assignRole('company_admin');
+    $newUser = User::factory()->create(['company_id' => $company->id]);
+
+    // First remove old admin
+    $this->actingAs($superAdmin)->post(route('admin.remove-company-admin'), [
+        'user_id' => $oldAdmin->id,
+    ])->assertSessionHas('status');
+
+    expect($oldAdmin->fresh()->isCompanyAdmin())->toBeFalse();
+
+    // Now assign new admin
+    $this->actingAs($superAdmin)->post(route('admin.assign-company-admin'), [
+        'user_id' => $newUser->id,
+    ])->assertSessionHas('status');
+
+    expect($newUser->fresh()->isCompanyAdmin())->toBeTrue();
+});
+
+test('cannot assign company admin to user without company', function () {
+    $superAdmin = createSuperAdmin();
+    $user = User::factory()->create(['company_id' => null]);
+
+    $this->actingAs($superAdmin)->post(route('admin.assign-company-admin'), [
+        'user_id' => $user->id,
+    ])->assertSessionHas('error');
+});
+
+test('cannot assign company admin to inactive user', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::factory()->create();
+    $inactiveUser = User::factory()->create(['company_id' => $company->id, 'is_active' => false]);
+
+    $this->actingAs($superAdmin)->post(route('admin.assign-company-admin'), [
+        'user_id' => $inactiveUser->id,
+    ])->assertSessionHas('error');
+
+    expect($inactiveUser->fresh()->isCompanyAdmin())->toBeFalse();
+});
+
+test('assigning company admin replaces existing role', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::factory()->create();
+    $user = User::factory()->create(['company_id' => $company->id]);
+    $user->assignRole('hr_manager');
+
+    $this->actingAs($superAdmin)->post(route('admin.assign-company-admin'), [
+        'user_id' => $user->id,
+    ])->assertSessionHas('status');
+
+    $user->refresh();
+    expect($user->isCompanyAdmin())->toBeTrue();
+    expect($user->isHrManager())->toBeFalse();
+});
+
+test('assigning company admin to already admin user shows info message', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::factory()->create();
+    $user = User::factory()->create(['company_id' => $company->id]);
+    $user->assignRole('company_admin');
+
+    $this->actingAs($superAdmin)->post(route('admin.assign-company-admin'), [
+        'user_id' => $user->id,
+    ])->assertSessionHas('status');
+
+    expect($user->fresh()->isCompanyAdmin())->toBeTrue();
+});
+
+// ============================================================
+// Admin Management Tests — Company Admin Removal
+// ============================================================
+test('super admin can remove company admin', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::factory()->create();
+    $admin = User::factory()->create(['company_id' => $company->id]);
+    $admin->assignRole('company_admin');
+
+    $this->actingAs($superAdmin)->post(route('admin.remove-company-admin'), [
+        'user_id' => $admin->id,
+    ])->assertSessionHas('status');
+
+    expect($admin->fresh()->isCompanyAdmin())->toBeFalse();
+    expect($admin->fresh()->isEmployee())->toBeTrue();
+});
+
+test('non-super admin cannot remove company admin', function () {
+    $user = createCompanyAdmin();
+    $company = Company::where('id', $user->company_id)->first();
+    $admin = User::factory()->create(['company_id' => $company->id]);
+    $admin->assignRole('company_admin');
+
+    $this->actingAs($user)->post(route('admin.remove-company-admin'), [
+        'user_id' => $admin->id,
+    ])->assertForbidden();
+});
+
+test('cannot remove company admin from non-admin user', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::factory()->create();
+    $user = User::factory()->create(['company_id' => $company->id]);
+
+    $this->actingAs($superAdmin)->post(route('admin.remove-company-admin'), [
+        'user_id' => $user->id,
+    ])->assertSessionHas('error');
+});
+
+test('removing company admin downgrades to employee', function () {
+    $superAdmin = createSuperAdmin();
+    $company = Company::factory()->create();
+    $admin = User::factory()->create(['company_id' => $company->id]);
+    $admin->assignRole('company_admin');
+
+    $this->actingAs($superAdmin)->post(route('admin.remove-company-admin'), [
+        'user_id' => $admin->id,
+    ]);
+
+    $admin->refresh();
+    expect($admin->isCompanyAdmin())->toBeFalse();
+    expect($admin->isEmployee())->toBeTrue();
+});
+
+// ============================================================
+// Admin Management Tests — Validation
+// ============================================================
+test('assign company admin requires user_id', function () {
+    $superAdmin = createSuperAdmin();
+
+    $this->actingAs($superAdmin)->post(route('admin.assign-company-admin'), [])
+        ->assertSessionHasErrors('user_id');
+});
+
+test('remove company admin requires user_id', function () {
+    $superAdmin = createSuperAdmin();
+
+    $this->actingAs($superAdmin)->post(route('admin.remove-company-admin'), [])
+        ->assertSessionHasErrors('user_id');
+});
+
+test('transfer super admin requires new_superadmin_id', function () {
+    $superAdmin = createSuperAdmin();
+
+    $this->actingAs($superAdmin)->post(route('admin.transfer-superadmin'), [])
+        ->assertSessionHasErrors('new_superadmin_id');
+});
+
+// ============================================================
+// Admin Management Tests — Unauthenticated Access
+// ============================================================
+test('unauthenticated users cannot access admin management routes', function () {
+    $this->post(route('admin.transfer-superadmin'), ['new_superadmin_id' => 1])
+        ->assertRedirect(route('login'));
+    $this->post(route('admin.assign-company-admin'), ['user_id' => 1])
+        ->assertRedirect(route('login'));
+    $this->post(route('admin.remove-company-admin'), ['user_id' => 1])
+        ->assertRedirect(route('login'));
+});

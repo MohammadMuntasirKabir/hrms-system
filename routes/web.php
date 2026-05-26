@@ -84,6 +84,13 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         Route::put('/users/{user}', [UserManagementController::class, 'update'])->middleware('permission:users.edit')->name('users.update');
         Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->middleware('permission:users.delete')->name('users.destroy');
     });
+
+    // Admin Management (super admin only)
+    Route::middleware(['auth', 'verified', 'active'])->group(function () {
+        Route::post('/admin/transfer-superadmin', [UserManagementController::class, 'transferSuperAdmin'])->name('admin.transfer-superadmin');
+        Route::post('/admin/assign-company-admin', [UserManagementController::class, 'assignCompanyAdmin'])->name('admin.assign-company-admin');
+        Route::post('/admin/remove-company-admin', [UserManagementController::class, 'removeCompanyAdmin'])->name('admin.remove-company-admin');
+    });
 });
 
 require __DIR__.'/settings.php';

@@ -304,4 +304,111 @@ class UserManagementController extends Controller
 
         return ['employee' => 'Employee'];
     }
+
+    // === Admin Management (Super Admin Only) ===
+
+    public function transferSuperAdmin(Request $request): RedirectResponse
+    {
+        $currentUser = $request->user();
+
+        if (! $currentUser->isSuperAdmin()) {
+            abort(403, 'Only a super admin can transfer super admin status.');
+        }
+
+        $validated = $request->validate([
+            'new_superadmin_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $newSuperAdmin = User::findOrFail($validated['new_superadmin_id']);
+
+        // Must be an active user
+        if (! $newSuperAdmin->is_active) {
+            return back()->with('error', 'Cannot assign super admin to an inactive user.');
+        }
+
+        // Remove super admin from current user
+        $currentUser->removeRole('super_admin');
+
+        // Assign super admin to the new user
+        $newSuperAdmin->assignRole('super_admin');
+
+        return redirect()->route('users.index')
+            ->with('status', 'Super admin role transferred to '.$newSuperAdmin->name.'. You are no longer a super admin.');
+    }
+
+    public function assignCompanyAdmin(Request $request): RedirectResponse
+    {
+        $currentUser = $request->user();
+
+        if (! $currentUser->isSuperAdmin()) {
+            abort(403, 'Only a super admin can assign company admins.');
+        }
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $targetUser = User::findOrFail($validated['user_id']);
+
+        // Must be an active user
+        if (! $targetUser->is_active) {
+            return back()->with('error', 'Cannot assign company admin to an inactive user.');
+        }
+
+        $companyId = $targetUser->company_id;
+
+        if (! $companyId) {
+            return back()->with('error', 'User must belong to a company to be assigned as company admin.');
+        }
+
+        // Check if this company already has a company admin (other than the target user)
+        $existingAdmin = User::where('company_id', $companyId)
+            ->where('id', '!=', $targetUser->id)
+            ->whereHas('roles', fn ($q) => $q->where('name', 'company_admin'))
+            ->first();
+
+        if ($existingAdmin) {
+            return back()->with('error', 'Company "'.$targetUser->company->name.'" already has an admin ('.$existingAdmin->name.'). Remove their admin status first.');
+        }
+
+        // If target already has company_admin, nothing to do
+        if ($targetUser->isCompanyAdmin()) {
+            return back()->with('status', $targetUser->name.' is already the admin of '.$targetUser->company->name.'.');
+        }
+
+        // Remove any existing senior role and assign company_admin
+        $targetUser->removeRole('hr_manager');
+        $targetUser->removeRole('hr_executive');
+        $targetUser->removeRole('department_head');
+        $targetUser->removeRole('employee');
+        $targetUser->assignRole('company_admin');
+
+        return redirect()->route('users.index')
+            ->with('status', $targetUser->name.' is now the admin of '.$targetUser->company->name.'.');
+    }
+
+    public function removeCompanyAdmin(Request $request): RedirectResponse
+    {
+        $currentUser = $request->user();
+
+        if (! $currentUser->isSuperAdmin()) {
+            abort(403, 'Only a super admin can remove company admins.');
+        }
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $targetUser = User::findOrFail($validated['user_id']);
+
+        if (! $targetUser->isCompanyAdmin()) {
+            return back()->with('error', $targetUser->name.' is not a company admin.');
+        }
+
+        $targetUser->removeRole('company_admin');
+        $targetUser->assignRole('employee');
+
+        return redirect()->route('users.index')
+            ->with('status', $targetUser->name.' has been removed as admin of '.$targetUser->company->name.'. They are now an employee.');
+    }
 }
