@@ -24,12 +24,17 @@ A full-featured HRMS built with **Laravel 13**, **Livewire 4**, **Flux UI v2**, 
 
 | Role | Access |
 |---|---|
-| **Super Admin** | Full access across all companies |
-| **Company Admin** | Full access within own company tree |
+| **Super Admin** | Full access across all companies. Only one super admin can exist at a time. |
+| **Company Admin** | Full access within own company tree. One admin per company. |
 | **HR Manager** | Employees, contracts, applicants, payroll |
 | **HR Executive** | View-only + limited create/edit |
 | **Department Head** | Department employees, leave approval |
 | **Employee** | Own profile and leave only |
+
+### Admin Management (Super Admin Only)
+- **Transfer Super Admin** — Transfer your super admin role to another active user. Only one super admin can exist at a time. After transfer, you lose all super admin privileges.
+- **Assign Company Admin** — Assign a user as admin of their company. Each company can have at most one admin. If a company already has an admin, the existing admin must be removed first. Assigning company admin replaces any existing role.
+- **Remove Company Admin** — Remove a company admin. The user is automatically downgraded to employee role.
 
 ### Modules
 
@@ -142,11 +147,12 @@ php artisan test tests/Feature/HRFeatureTest.php
 php artisan test --filter="super admin can hire an applicant"
 ```
 
-**171 tests, 352 assertions** covering:
+**191 tests, 399 assertions** covering:
 - All CRUD operations for every resource
 - Authorization and role-based access control
 - Cross-company data isolation
 - Applicant recruitment workflow (review → shortlist → hire → undo)
+- **Admin management** (super admin transfer, company admin assignment/removal, one-admin-per-company enforcement)
 - Session flash messages and validation errors
 - Dashboard per role
 
@@ -155,41 +161,41 @@ php artisan test --filter="super admin can hire an applicant"
 ```
 app/
 ├── Http/Controllers/
-│   ├── ApplicantController.php    # Job applicant CRUD + hire workflow
-│   ├── CompanyController.php      # Company CRUD with hierarchy
-│   ├── ContractController.php     # Contract CRUD
-│   ├── DashboardController.php    # Role-specific dashboards
-│   ├── DepartmentController.php   # Department CRUD with nesting
-│   ├── DesignationController.php  # Designation CRUD
-│   ├── SalaryController.php       # Salary CRUD
-│   └── UserManagementController.php # Employee CRUD + role assignment
+│   ├── ApplicantController.php        # Job applicant CRUD + hire workflow
+│   ├── CompanyController.php          # Company CRUD with hierarchy
+│   ├── ContractController.php         # Contract CRUD
+│   ├── DashboardController.php        # Role-specific dashboards
+│   ├── DepartmentController.php       # Department CRUD with nesting
+│   ├── DesignationController.php      # Designation CRUD
+│   ├── SalaryController.php           # Salary CRUD
+│   └── UserManagementController.php   # Employee CRUD + role assignment + admin management
 ├── Models/
-│   ├── Company.php                # Hierarchy: parentCompany, childCompanies
-│   ├── Contract.php               # Accessors: is_expired, is_expiring_soon
-│   ├── Department.php             # Self-nesting: parentDepartment, childDepartments
-│   ├── Designation.php            # Level-based job titles
-│   ├── JobApplicant.php           # Status checks: isHired, isPending, etc.
-│   ├── Salary.php                 # Calculators: net salary, annual salary
-│   └── User.php                   # Roles, activeContract, activeSalary
+│   ├── Company.php                    # Hierarchy: parentCompany, childCompanies
+│   ├── Contract.php                   # Accessors: is_expired, is_expiring_soon
+│   ├── Department.php                 # Self-nesting: parentDepartment, childDepartments
+│   ├── Designation.php                # Level-based job titles
+│   ├── JobApplicant.php               # Status checks: isHired, isPending, etc.
+│   ├── Salary.php                     # Calculators: net salary, annual salary
+│   └── User.php                       # Roles, activeContract, activeSalary
 ├── Livewire/Actions/Logout.php
 ├── View/Composers/SidebarComposer.php
 └── ...
 
 resources/views/
-├── applicants/                    # Job applicant pages
-├── companies/                     # Company pages
-├── contracts/                     # Contract pages
-├── dashboard/                     # Role-specific dashboards (super-admin, admin, dept-head, employee)
-├── departments/                   # Department pages
-├── designations/                  # Designation pages
-├── salaries/                      # Salary pages
-└── users/                         # Employee pages
+├── applicants/                        # Job applicant pages
+├── companies/                         # Company pages
+├── contracts/                         # Contract pages
+├── dashboard/                         # Role-specific dashboards (super-admin, admin, dept-head, employee)
+├── departments/                       # Department pages
+├── designations/                      # Designation pages
+├── salaries/                          # Salary pages
+└── users/                             # Employee pages (with admin management section)
 
 tests/Feature/
-├── Auth/                          # Authentication tests (login, register, 2FA, password reset)
-├── Settings/                      # Profile and security settings tests
-├── DashboardTest.php              # Dashboard access tests
-└── HRFeatureTest.php              # 171 comprehensive feature tests
+├── Auth/                              # Authentication tests (login, register, 2FA, password reset)
+├── Settings/                          # Profile and security settings tests
+├── DashboardTest.php                  # Dashboard access tests
+└── HRFeatureTest.php                  # 191 comprehensive feature tests
 ```
 
 ## Key Design Decisions
@@ -199,6 +205,9 @@ tests/Feature/
 - **Eager loading**: `activeContract` and `activeSalary` are `HasOne` relationships (not methods) to support `with()` eager loading
 - **Applicant hire**: Atomic operation that creates User + Contract + Salary in one request
 - **24-hour undo**: Hired applicants can be reverted within 24 hours, deleting all created records
+- **Single super admin**: Only one super admin can exist. Transfer is required to delegate super admin privileges
+- **One company admin per company**: Enforced at assignment time. Existing admin must be removed before assigning a new one
+- **Role replacement**: Assigning company admin replaces any existing senior role (hr_manager, hr_executive, etc.)
 
 ## License
 
