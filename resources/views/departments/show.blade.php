@@ -10,6 +10,12 @@
                 @can('departments.edit')
                     <flux:button :href="route('departments.edit', $department)" variant="outline" icon="pencil" wire:navigate>{{ __('Edit') }}</flux:button>
                 @endcan
+                @can('departments.delete')
+                    <form method="POST" action="{{ route('departments.destroy', $department) }}" class="inline">
+                        @csrf @method('DELETE')
+                        <flux:button type="submit" variant="danger" icon="trash" onclick="return confirm('{{ __('Delete this department?') }}')">{{ __('Delete') }}</flux:button>
+                    </form>
+                @endcan>
             </div>
         </div>
 
@@ -54,7 +60,7 @@
                         <div class="hrms-stat-icon bg-emerald-50 dark:bg-emerald-900/30"><flux:icon name="building-office-2" class="size-5 text-emerald-600 dark:text-emerald-400" /></div>
                         <div>
                             <flux:text class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Sub-Depts') }}</flux:text>
-                            <p class="text-2xl font-bold text-zinc-900 dark:text-white mt-0.5">{{ $department->child_departments_count }}</p>
+                            <p class="text-2xl font-bold text-zinc-900 dark:text-white mt-0.5">{{ $department->child_departments()->count() }}</p>
                         </div>
                     </div>
                 </div>

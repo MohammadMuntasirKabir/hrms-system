@@ -57,95 +57,206 @@
     }
 }
 
-@layer components {
-    /* Stat card hover effect */
-    .hrms-stat-card {
-        @apply transition-all duration-200;
-    }
-    .hrms-stat-card:hover {
-        @apply shadow-lg;
-        transform: translateY(-2px);
-    }
+/* ===== HRMS Custom Components ===== */
 
-    /* Stat card icon container */
-    .hrms-stat-icon {
-        @apply flex items-center justify-center w-10 h-10 rounded-lg;
-    }
+/* Stat card */
+.hrms-stat-card {
+    transition: all 0.2s;
+}
+.hrms-stat-card:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    transform: translateY(-2px);
+}
 
-    /* Badge refinements */
-    .hrms-badge-success {
-        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700;
-    }
-    .dark .hrms-badge-success {
-        @apply bg-emerald-900/30 text-emerald-400;
-    }
-    .hrms-badge-danger {
-        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700;
-    }
-    .dark .hrms-badge-danger {
-        @apply bg-red-900/30 text-red-400;
-    }
-    .hrms-badge-info {
-        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700;
-    }
-    .dark .hrms-badge-info {
-        @apply bg-blue-900/30 text-blue-400;
-    }
-    .hrms-badge-warning {
-        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700;
-    }
-    .dark .hrms-badge-warning {
-        @apply bg-amber-900/30 text-amber-400;
-    }
-    .hrms-badge-neutral {
-        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600;
-    }
-    .dark .hrms-badge-neutral {
-        @apply bg-zinc-800 text-zinc-400;
-    }
-    .hrms-badge-purple {
-        @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700;
-    }
-    .dark .hrms-badge-purple {
-        @apply bg-purple-900/30 text-purple-400;
-    }
+.hrms-stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+}
 
-    /* Content card */
-    .hrms-card {
-        @apply bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm overflow-hidden;
-    }
+/* Badges */
+.hrms-badge-success {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #ecfdf5;
+    color: #047857;
+}
+.dark .hrms-badge-success {
+    background-color: rgb(6 78 59 / 0.3);
+    color: #34d399;
+}
+
+.hrms-badge-danger {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #fef2f2;
+    color: #b91c1c;
+}
+.dark .hrms-badge-danger {
+    background-color: rgb(127 29 29 / 0.3);
+    color: #f87171;
+}
+
+.hrms-badge-info {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #eff6ff;
+    color: #1d4ed8;
+}
+.dark .hrms-badge-info {
+    background-color: rgb(30 58 138 / 0.3);
+    color: #60a5fa;
+}
+
+.hrms-badge-warning {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #fffbeb;
+    color: #b45309;
+}
+.dark .hrms-badge-warning {
+    background-color: rgb(120 53 15 / 0.3);
+    color: #fbbf24;
+}
+
+.hrms-badge-neutral {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #f4f4f5;
+    color: #52525b;
+}
+.dark .hrms-badge-neutral {
+    background-color: #27272a;
+    color: #a1a1aa;
+}
+
+.hrms-badge-purple {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #faf5ff;
+    color: #7c3aed;
+}
+.dark .hrms-badge-purple {
+    background-color: rgb(88 28 135 / 0.3);
+    color: #c084fc;
+}
+
+/* Cards */
+.hrms-card {
+    background-color: #fff;
+    border-radius: 0.75rem;
+    border: 1px solid #e4e4e7;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    overflow: hidden;
+}
+.dark .hrms-card {
+    background-color: #18181b;
+    border-color: #3f3f46;
+}
+
+.hrms-card-body {
+    padding: 1.25rem;
+}
+@media (min-width: 640px) {
     .hrms-card-body {
-        @apply p-5 sm:p-6;
+        padding: 1.5rem;
     }
+}
 
-    /* Card inner list rows */
-    .hrms-list-row {
-        @apply py-3 px-1;
-    }
-    .hrms-list-row:first-child {
-        @apply pt-1;
-    }
+/* Card inner list rows */
+.hrms-list-row {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+}
+.hrms-list-row:first-child {
+    padding-top: 0.25rem;
+}
 
-    /* Action button group */
-    .hrms-actions {
-        @apply flex flex-wrap items-center gap-2;
-    }
+/* Action button group */
+.hrms-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-    /* Empty state */
-    .hrms-empty-state {
-        @apply flex flex-col items-center justify-center py-12 text-center;
-    }
-    .hrms-empty-state-icon {
-        @apply w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4;
-    }
+/* Empty state */
+.hrms-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    text-align: center;
+}
+.hrms-empty-state-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 9999px;
+    background-color: #f4f4f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+.dark .hrms-empty-state-icon {
+    background-color: #27272a;
+}
 
-    /* Auth gradient */
-    .hrms-auth-gradient {
-        background: linear-gradient(135deg, #0c1222 0%, #1e3a8a 50%, #2563eb 100%);
-    }
-    .dark .hrms-auth-gradient {
-        background: linear-gradient(135deg, #0c1222 0%, #0f1629 50%, #1e3a8a 100%);
-    }
+/* Auth gradient */
+.hrms-auth-gradient {
+    background: linear-gradient(135deg, #0c1222 0%, #1e3a8a 50%, #2563eb 100%);
+}
+
+/* Form card */
+.hrms-form-card {
+    background-color: #fff;
+    border-radius: 0.75rem;
+    border: 1px solid #e4e4e7;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    padding: 1.5rem;
+}
+.dark .hrms-form-card {
+    background-color: #18181b;
+    border-color: #3f3f46;
+}
+
+/* Line clamp */
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* ===== Dark Blue Sidebar ===== */
@@ -155,56 +266,44 @@
     background-color: #0c1222 !important;
     border-color: #0f1629 !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-item] {
     color: rgba(255, 255, 255, 0.6) !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-item]:hover {
     color: rgba(255, 255, 255, 0.9) !important;
     background-color: rgba(255, 255, 255, 0.06) !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-item][data-current="true"],
 [flux-sidebar] [data-flux-sidebar-item].active {
-    color: #ffffff !important;
+    color: #fff !important;
     background-color: rgba(59, 130, 246, 0.2) !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-group-heading] {
     color: rgba(255, 255, 255, 0.35) !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-brand] {
-    color: #ffffff !important;
+    color: #fff !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-item] svg {
     color: rgba(255, 255, 255, 0.5) !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-item][data-current="true"] svg,
 [flux-sidebar] [data-flux-sidebar-item].active svg {
     color: #60a5fa !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-collapse] {
     color: rgba(255, 255, 255, 0.4) !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-collapse]:hover {
     color: rgba(255, 255, 255, 0.8) !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-profile] {
     color: rgba(255, 255, 255, 0.7) !important;
 }
-
 [flux-sidebar] [data-flux-sidebar-profile]:hover {
-    color: #ffffff !important;
+    color: #fff !important;
     background-color: rgba(255, 255, 255, 0.06) !important;
 }
-
 [flux-sidebar] [data-flux-separator],
 [flux-sidebar] hr {
     border-color: rgba(255, 255, 255, 0.08) !important;
@@ -212,48 +311,47 @@
 
 /* ===== Flux field overrides ===== */
 [data-flux-field]:not(ui-radio, ui-checkbox) {
-    @apply grid gap-2;
+    display: grid;
+    gap: 0.5rem;
 }
-
 [data-flux-label] {
-    @apply !mb-0 !leading-tight;
+    margin-bottom: 0 !important;
+    line-height: 1.25 !important;
 }
-
 input:focus[data-flux-control],
 textarea:focus[data-flux-control],
 select:focus[data-flux-control] {
-    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
+    outline: hidden;
+    box-shadow: 0 0 0 2px var(--color-accent), 0 0 0 4px var(--color-accent-foreground);
 }
 
 /* ===== Auth Card Dark Theme ===== */
 [data-flux-input] input,
 [data-flux-input] textarea,
 [data-flux-select] select {
-    @apply bg-white/5 border-white/10 text-white placeholder:text-zinc-500;
+    background-color: rgb(255 255 255 / 0.05);
+    border-color: rgb(255 255 255 / 0.1);
+    color: #fff;
 }
-
+[data-flux-input] input::placeholder,
+[data-flux-input] textarea::placeholder,
+[data-flux-select] select::placeholder {
+    color: #71717a;
+}
 [data-flux-input] input:focus,
 [data-flux-input] textarea:focus,
 [data-flux-select] select:focus {
-    @apply border-hrms-500/50 ring-hrms-500/20;
+    border-color: rgb(96 165 250 / 0.5);
+    box-shadow: 0 0 0 2px rgb(96 165 250 / 0.2);
 }
-
 [data-flux-label] {
-    @apply text-zinc-300;
+    color: #d4d4d8;
 }
-
 [data-flux-checkbox] {
-    @apply border-white/20 bg-white/5;
+    border-color: rgb(255 255 255 / 0.2);
+    background-color: rgb(255 255 255 / 0.05);
 }
-
 [data-flux-checkbox]:checked {
-    @apply bg-hrms-600 border-hrms-600;
-}
-
-/* ===== Line clamp utility ===== */
-.line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    background-color: #2563eb;
+    border-color: #2563eb;
 }

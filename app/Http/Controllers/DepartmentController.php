@@ -13,7 +13,7 @@ class DepartmentController extends Controller
 {
     private function authorizeCompany(Request $request, Company $company): void
     {
-        if (!$request->user()->canViewCompany($company)) {
+        if (! $request->user()->canViewCompany($company)) {
             abort(403);
         }
     }
@@ -21,6 +21,7 @@ class DepartmentController extends Controller
     private function getCompanyFilter(Request $request): ?int
     {
         $companyId = $request->input('company_id') ?? session('filter_company_id');
+
         return $companyId ? (int) $companyId : null;
     }
 
@@ -32,7 +33,7 @@ class DepartmentController extends Controller
         $query = Department::with(['company', 'headUser'])
             ->withCount(['users', 'designations', 'contracts', 'childDepartments']);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->whereIn('company_id', $user->getAllowedCompanyIds());
         } elseif ($companyId) {
             $query->where('company_id', $companyId);
@@ -62,13 +63,13 @@ class DepartmentController extends Controller
             : Company::whereIn('id', $user->getAllowedCompanyIds())->orderBy('name')->get();
 
         $parentDepartments = Department::where('is_active', true)
-            ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $heads = User::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -91,7 +92,7 @@ class DepartmentController extends Controller
         $company = Company::findOrFail($validated['company_id']);
         $this->authorizeCompany($request, $company);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $validated['company_id'] = $user->company_id;
         }
 
@@ -99,7 +100,7 @@ class DepartmentController extends Controller
         $department = Department::create($validated);
 
         return redirect()->route('departments.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Department "' . $department->name . '" created successfully.');
+            ->with('status', 'Department "'.$department->name.'" created successfully.');
     }
 
     public function show(Request $request, Department $department): View
@@ -114,7 +115,7 @@ class DepartmentController extends Controller
         $designations = $department->designations()->withCount('users')->orderBy('level')->get();
         $contracts = $department->contracts()->with(['user.designation'])->latest('start_date')->take(10)->get();
 
-        return view('departments.show', compact('department', 'employees', 'designations', 'contracts', 'user'));
+        return view('departments.show', compact('department', 'employees', 'designations', 'contracts'));
     }
 
     public function edit(Request $request, Department $department): View
@@ -128,12 +129,12 @@ class DepartmentController extends Controller
 
         $parentDepartments = Department::where('is_active', true)
             ->where('id', '!=', $department->id)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $heads = User::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -155,17 +156,18 @@ class DepartmentController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $validated['company_id'] = $user->company_id;
         }
 
-        if (!empty($validated['parent_department_id']) && $validated['parent_department_id'] == $department->id) {
+        if (! empty($validated['parent_department_id']) && $validated['parent_department_id'] == $department->id) {
             return back()->with('error', 'A department cannot be its own parent.')->withInput();
         }
 
         $department->update($validated);
+
         return redirect()->route('departments.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Department "' . $department->name . '" updated successfully.');
+            ->with('status', 'Department "'.$department->name.'" updated successfully.');
     }
 
     public function destroy(Request $request, Department $department): RedirectResponse
@@ -178,14 +180,20 @@ class DepartmentController extends Controller
 
         if ($hasUsers || $hasChildren) {
             $parts = [];
-            if ($hasUsers) $parts[] = $department->users()->count() . ' employee(s)';
-            if ($hasChildren) $parts[] = $department->childDepartments()->count() . ' sub-department(s)';
-            return redirect()->route('departments.index')->with('error', 'Cannot delete "' . $department->name . '" — has ' . implode(' and ', $parts) . '.');
+            if ($hasUsers) {
+                $parts[] = $department->users()->count().' employee(s)';
+            }
+            if ($hasChildren) {
+                $parts[] = $department->childDepartments()->count().' sub-department(s)';
+            }
+
+            return redirect()->route('departments.index')->with('error', 'Cannot delete "'.$department->name.'" — has '.implode(' and ', $parts).'.');
         }
 
         $name = $department->name;
         $department->delete();
+
         return redirect()->route('departments.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Department "' . $name . '" deleted.');
+            ->with('status', 'Department "'.$name.'" deleted.');
     }
 }

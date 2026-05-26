@@ -24,7 +24,12 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     // Companies
     Route::middleware(['permission:companies.view'])->group(function () {
         Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
+        Route::get('/companies/create', [CompanyController::class, 'create'])->middleware('permission:companies.create')->name('companies.create');
+        Route::post('/companies', [CompanyController::class, 'store'])->middleware('permission:companies.create')->name('companies.store');
         Route::get('/companies/{company}', [CompanyController::class, 'show'])->name('companies.show');
+        Route::get('/companies/{company}/edit', [CompanyController::class, 'edit'])->middleware('permission:companies.edit')->name('companies.edit');
+        Route::put('/companies/{company}', [CompanyController::class, 'update'])->middleware('permission:companies.edit')->name('companies.update');
+        Route::delete('/companies/{company}', [CompanyController::class, 'destroy'])->middleware('permission:companies.delete')->name('companies.destroy');
     });
 
     // Departments
