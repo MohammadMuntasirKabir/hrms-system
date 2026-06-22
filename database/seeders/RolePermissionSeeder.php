@@ -34,6 +34,7 @@ class RolePermissionSeeder extends Seeder
     private const ROLE_PERMISSIONS = [
         'super_admin' => ['*'],
         'company_admin' => [
+            'companies.view',
             'companies.edit',
             'users.view', 'users.create', 'users.edit', 'users.delete',
             'roles.view', 'roles.assign',

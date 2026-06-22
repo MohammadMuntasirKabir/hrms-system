@@ -57,43 +57,47 @@ class DashboardController extends Controller
     private function getStats(User $user, Request $request): array
     {
         $companyId = $this->getCompanyFilter($request);
-        $companyIds = $user->isSuperAdmin()
-            ? ($companyId ? [$companyId] : null)
-            : $user->getAllowedCompanyIds();
+        $cacheKey = 'dashboard_stats_' . $user->id . '_' . ($companyId ?? 'all');
 
-        $userQuery = User::query();
-        $deptQuery = Department::query();
-        $desigQuery = Designation::query();
-        $contractQuery = Contract::query();
-        $salaryQuery = Salary::query();
+        return cache()->remember($cacheKey, now()->addMinutes(5), function () use ($user, $companyId) {
+            $companyIds = $user->isSuperAdmin()
+                ? ($companyId ? [$companyId] : null)
+                : $user->getAllowedCompanyIds();
 
-        if ($companyIds !== null) {
-            $userQuery->whereIn('company_id', $companyIds);
-            $deptQuery->whereIn('company_id', $companyIds);
-            $desigQuery->whereIn('company_id', $companyIds);
-            $contractQuery->whereIn('company_id', $companyIds);
-            $salaryQuery->whereIn('company_id', $companyIds);
-        }
+            $userQuery = User::query();
+            $deptQuery = Department::query();
+            $desigQuery = Designation::query();
+            $contractQuery = Contract::query();
+            $salaryQuery = Salary::query();
 
-        $activeContractQuery = (clone $contractQuery)->where('status', 'active');
-        $expiringQuery = (clone $activeContractQuery)
-            ->whereNotNull('end_date')
-            ->where('end_date', '<=', now()->addDays(30))
-            ->where('end_date', '>=', now());
+            if ($companyIds !== null) {
+                $userQuery->whereIn('company_id', $companyIds);
+                $deptQuery->whereIn('company_id', $companyIds);
+                $desigQuery->whereIn('company_id', $companyIds);
+                $contractQuery->whereIn('company_id', $companyIds);
+                $salaryQuery->whereIn('company_id', $companyIds);
+            }
 
-        return [
-            'totalEmployees' => (clone $userQuery)->count(),
-            'activeEmployees' => (clone $userQuery)->where('is_active', true)->count(),
-            'totalDepartments' => (clone $deptQuery)->count(),
-            'totalDesignations' => (clone $desigQuery)->count(),
-            'activeContracts' => (clone $activeContractQuery)->count(),
-            'expiringContracts' => (clone $expiringQuery)->count(),
-            'totalPayroll' => (clone $salaryQuery)->where('status', 'active')->sum('net_salary'),
-            'avgSalary' => (clone $salaryQuery)->where('status', 'active')->avg('net_salary'),
-            'totalCompanies' => $user->isSuperAdmin()
-                ? ($companyId ? 1 : Company::count())
-                : Company::whereIn('id', $companyIds ?? [])->count(),
-        ];
+            $activeContractQuery = (clone $contractQuery)->where('status', 'active');
+            $expiringQuery = (clone $activeContractQuery)
+                ->whereNotNull('end_date')
+                ->where('end_date', '<=', now()->addDays(30))
+                ->where('end_date', '>=', now());
+
+            return [
+                'totalEmployees' => (clone $userQuery)->count(),
+                'activeEmployees' => (clone $userQuery)->where('is_active', true)->count(),
+                'totalDepartments' => (clone $deptQuery)->count(),
+                'totalDesignations' => (clone $desigQuery)->count(),
+                'activeContracts' => (clone $activeContractQuery)->count(),
+                'expiringContracts' => (clone $expiringQuery)->count(),
+                'totalPayroll' => (clone $salaryQuery)->where('status', 'active')->sum('net_salary'),
+                'avgSalary' => (clone $salaryQuery)->where('status', 'active')->avg('net_salary'),
+                'totalCompanies' => $user->isSuperAdmin()
+                    ? ($companyId ? 1 : Company::count())
+                    : Company::whereIn('id', $companyIds ?? [])->count(),
+            ];
+        });
     }
 
     private function getRecentItems(User $user, Request $request): array
