@@ -6,12 +6,13 @@ A full-featured HRMS built with **Laravel 13**, **Livewire 4**, **Flux UI v2**, 
 
 | Layer | Stack |
 |---|---|
-| Backend | Laravel 13 (PHP 8.3) |
+| Backend | Laravel 13 (PHP 8.3+) |
 | Frontend | Livewire 4 + Flux UI v2 + Tailwind CSS 4 |
 | Auth | Laravel Fortify (with Passkeys + 2FA) |
 | Permissions | Spatie Laravel Permission |
 | Database | SQLite (default) / MySQL / PostgreSQL |
 | Testing | Pest PHP v4 |
+| Build | Vite 8 |
 
 ## Features
 
