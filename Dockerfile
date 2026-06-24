@@ -21,12 +21,17 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . .
+
+# Create .env from .env.example and generate key
+RUN cp .env.example .env
 RUN php artisan key:generate --no-interaction
+
 RUN npm run build
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
 
+# Run migrations
 RUN php artisan migrate --force
 
 EXPOSE 80
