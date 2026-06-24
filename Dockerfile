@@ -31,8 +31,8 @@ RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
 
-# Run migrations
+# Create SQLite database directory and run migrations
+RUN touch database/database.sqlite
 RUN php artisan migrate --force
 
 EXPOSE 80
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
