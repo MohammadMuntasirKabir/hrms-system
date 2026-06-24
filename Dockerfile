@@ -7,10 +7,11 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_sqlite \
     && apt-get clean
 
-# Fix nginx root - webdevops uses conf.d directory
-RUN mkdir -p /etc/nginx/conf.d \
-    && rm -f /etc/nginx/sites-enabled/default 2>/dev/null \
-    && rm -f /etc/nginx/sites-available/default 2>/dev/null
+# Remove the default webdevops nginx config and replace with our own
+RUN rm -f /etc/nginx/conf.d/default.conf \
+    && rm -f /etc/nginx/sites-enabled/default \
+    && rm -f /etc/nginx/sites-available/default \
+    && rm -f /etc/nginx/vhost/common/php.conf 2>/dev/null
 
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
