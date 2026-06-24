@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_sqlite \
     && apt-get clean
 
+# Override nginx config to point to /public
+RUN sed -i 's|root /app;|root /app/public;|g' /etc/nginx/sites-available/default.conf 2>/dev/null || true
+
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
