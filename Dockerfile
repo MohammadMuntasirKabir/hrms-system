@@ -7,8 +7,12 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_sqlite \
     && apt-get clean
 
-# Override nginx config to point to /public
-RUN sed -i 's|root /app;|root /app/public;|g' /etc/nginx/sites-available/default.conf 2>/dev/null || true
+# Fix nginx root to point to /app/public
+RUN rm -f /etc/nginx/sites-available/default.conf \
+    && rm -f /etc/nginx/sites-enabled/default.conf
+
+COPY docker/nginx.conf /etc/nginx/sites-available/app.conf
+RUN ln -s /etc/nginx/sites-available/app.conf /etc/nginx/sites-enabled/app.conf
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
