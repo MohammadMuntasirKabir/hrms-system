@@ -7,12 +7,12 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_sqlite \
     && apt-get clean
 
-# Fix nginx root to point to /app/public
-RUN rm -f /etc/nginx/sites-available/default.conf \
-    && rm -f /etc/nginx/sites-enabled/default.conf
+# Fix nginx root - webdevops uses conf.d directory
+RUN mkdir -p /etc/nginx/conf.d \
+    && rm -f /etc/nginx/sites-enabled/default 2>/dev/null \
+    && rm -f /etc/nginx/sites-available/default 2>/dev/null
 
-COPY docker/nginx.conf /etc/nginx/sites-available/app.conf
-RUN ln -s /etc/nginx/sites-available/app.conf /etc/nginx/sites-enabled/app.conf
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
