@@ -7,6 +7,7 @@ services:
       composer install --no-dev --optimize-autoloader
       npm install
       npm run build
+      php artisan config:clear
       php artisan config:cache
       php artisan route:cache
       php artisan view:cache
@@ -19,6 +20,8 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_URL
+        value: https://hrms-system-ogg4.onrender.com
+      - key: ASSET_URL
         value: https://hrms-system-ogg4.onrender.com
       - key: DB_CONNECTION
         value: sqlite
