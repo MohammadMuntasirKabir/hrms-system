@@ -27,3 +27,7 @@ yarn-error.log
 build/
 public/build/
 
+.vercel
+
+# Laravel generated cache (regenerated per-environment)
+/bootstrap/cache/*.php

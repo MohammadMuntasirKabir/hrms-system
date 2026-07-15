@@ -93,7 +93,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": [],
+            "dont-discover": [
+                "laravel/pail"
+            ],
             "installer": {
                 "post-create-project": []
             }
