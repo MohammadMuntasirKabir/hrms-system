@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 
 try {
 
+    // On Vercel the runtime filesystem is read-only (except /tmp), so point
+    // Laravel's storage path at a writable location.
     if (getenv('VERCEL') !== false || isset($_SERVER['VERCEL'])) {
         $tmp = '/tmp/laravel-storage';
         if (! is_dir($tmp)) {
@@ -33,27 +35,26 @@ try {
         $app->useStoragePath(getenv('LARAVEL_STORAGE_PATH'));
     }
 
-    // DIAGNOSTIC: boot kernel, report provider state, then stop.
     $kernel = $app->make(Kernel::class);
-    $request = Request::create('/login', 'GET');
-    $app->instance('request', $request);
-    $kernel->bootstrap();
 
-    header('Content-Type: text/plain');
-    $loaded = $app->getLoadedProviders();
-    echo "PHP: ".PHP_VERSION."\n";
-    echo "ViewServiceProvider loaded? ".(isset($loaded['Illuminate\View\ViewServiceProvider']) ? "YES" : "NO")."\n";
-    echo "app.providers count: ".count(config('app.providers') ?? [])."\n";
-    echo "DefaultProviders has View? ".(in_array('Illuminate\View\ViewServiceProvider', (new Illuminate\Support\DefaultProviders())->toArray()) ? "YES" : "NO")."\n";
-    echo "packages.php exists? ".(is_file(__DIR__.'/../bootstrap/cache/packages.php') ? "YES" : "NO")."\n";
-    echo "try view: ";
-    try { echo get_class($app->make('view'))."\n"; } catch (\Throwable $e) { echo "ERR ".$e->getMessage()."\n"; }
-    exit;
+    $response = $kernel->handle(
+        $request = Request::capture()
+    )->send();
+
+    $kernel->terminate($request, $response);
 
 } catch (\Throwable $e) {
     http_response_code(500);
     header('Content-Type: text/plain');
-    echo 'EXCEPTION: '.get_class($e)."\n";
-    echo 'MESSAGE: '.$e->getMessage()."\n";
+
+    if (getenv('APP_DEBUG') !== 'false') {
+        echo 'EXCEPTION: '.get_class($e)."\n";
+        echo 'MESSAGE: '.$e->getMessage()."\n";
+        echo 'FILE: '.$e->getFile().':'.$e->getLine()."\n";
+        echo "TRACE:\n".$e->getTraceAsString()."\n";
+    } else {
+        echo 'Internal Server Error';
+    }
+
     exit(1);
 }
