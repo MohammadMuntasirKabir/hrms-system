@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Company;
 use App\Models\Salary;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,6 +19,8 @@ class SalaryFactory extends Factory
         $deductions = fake()->numberBetween(0, 10000);
 
         return [
+            'user_id' => User::factory(),
+            'company_id' => Company::factory(),
             'contract_id' => null,
             'base_salary' => $base,
             'allowances' => $allowances,

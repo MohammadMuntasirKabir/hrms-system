@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Company;
 use App\Models\Contract;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -13,6 +15,8 @@ class ContractFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::factory(),
+            'company_id' => Company::factory(),
             'contract_type' => 'full_time',
             'position' => fake()->jobTitle(),
             'start_date' => fake()->dateTimeBetween('-1 year', 'now'),

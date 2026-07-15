@@ -63,6 +63,7 @@ class Contract extends Model
         if ($this->end_date === null) {
             return false;
         }
-        return $this->end_date->isFuture() && $this->end_date->diffInDays(now()) <= 30;
+
+        return $this->end_date->isFuture() && now()->diffInDays($this->end_date) <= 30;
     }
 }

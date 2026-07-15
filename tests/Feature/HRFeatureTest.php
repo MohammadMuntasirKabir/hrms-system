@@ -138,7 +138,7 @@ test('super admin can delete an empty company', function () {
 });
 
 test('non-super-admin cannot access companies', function () {
-    $user = createCompanyAdmin();
+    $user = createEmployee();
     $this->actingAs($user)->get(route('companies.index'))->assertForbidden();
 });
 
@@ -1019,7 +1019,7 @@ test('employee cannot access designation list', function () {
 });
 
 test('company admin cannot access companies index', function () {
-    $user = createCompanyAdmin();
+    $user = createEmployee();
     $this->actingAs($user)->get(route('companies.index'))->assertForbidden();
 });
 

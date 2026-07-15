@@ -110,17 +110,17 @@ test('applicant belongs to hired as user', function () {
 
 test('expected salary is cast to decimal', function () {
     $applicant = JobApplicant::factory()->create(['expected_salary' => 50000.50]);
-    expect($applicant->expected_salary)->toBe(50000.50);
+    expect($applicant->expected_salary)->toBe('50000.50');
 });
 
 test('available from is cast to date', function () {
     $applicant = JobApplicant::factory()->create(['available_from' => '2025-06-01']);
-    expect($applicant->available_from)->toBeInstanceOf(\Carbon\Carbon::class);
+    expect($applicant->available_from)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
 });
 
 test('reviewed at is cast to datetime', function () {
     $applicant = JobApplicant::factory()->create(['reviewed_at' => '2025-01-15 10:30:00']);
-    expect($applicant->reviewed_at)->toBeInstanceOf(\Carbon\Carbon::class);
+    expect($applicant->reviewed_at)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
 });
 
 

@@ -118,7 +118,7 @@ test('contract salary is cast to decimal', function () {
         'salary' => 50000.50,
     ]);
 
-    expect($contract->salary)->toBe(50000.50);
+    expect($contract->salary)->toBe('50000.50');
 });
 
 test('contract dates are cast to date', function () {
@@ -133,8 +133,8 @@ test('contract dates are cast to date', function () {
         'end_date' => '2025-12-31',
     ]);
 
-    expect($contract->start_date)->toBeInstanceOf(\Carbon\Carbon::class);
-    expect($contract->end_date)->toBeInstanceOf(\Carbon\Carbon::class);
+    expect($contract->start_date)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
+    expect($contract->end_date)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
 });
 
 

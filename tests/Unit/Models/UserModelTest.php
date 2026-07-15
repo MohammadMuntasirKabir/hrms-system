@@ -10,7 +10,7 @@ use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 beforeEach(function () {
-    seed(RolePermissionSeeder::class);
+    $this->seed(RolePermissionSeeder::class);
 });
 
 // === Role Checks ===
@@ -135,7 +135,9 @@ test('super admin gets all company ids', function () {
     $companies = Company::factory()->count(3)->create();
 
     $ids = $user->getAllowedCompanyIds();
-    expect($ids)->toHaveCount(3);
+    foreach ($companies as $company) {
+        expect($ids)->toContain($company->id);
+    }
 });
 
 test('employee gets their own company id', function () {

@@ -174,10 +174,10 @@ test('salary monetary fields are cast to decimal', function () {
         'net_salary' => 55000.00,
     ]);
 
-    expect($salary->base_salary)->toBe(50000.50);
-    expect($salary->allowances)->toBe(10000.25);
-    expect($salary->deductions)->toBe(5000.75);
-    expect($salary->net_salary)->toBe(55000.00);
+    expect($salary->base_salary)->toBe('50000.50');
+    expect($salary->allowances)->toBe('10000.25');
+    expect($salary->deductions)->toBe('5000.75');
+    expect($salary->net_salary)->toBe('55000.00');
 });
 
 test('salary dates are cast to date', function () {
@@ -192,8 +192,8 @@ test('salary dates are cast to date', function () {
         'effective_until' => '2025-12-31',
     ]);
 
-    expect($salary->effective_from)->toBeInstanceOf(\Carbon\Carbon::class);
-    expect($salary->effective_until)->toBeInstanceOf(\Carbon\Carbon::class);
+    expect($salary->effective_from)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
+    expect($salary->effective_until)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
 });
 
 
