@@ -9,7 +9,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\DefaultProviders;
 
 return Application::configure(basePath: dirname(__DIR__))
-    ->withProviders(DefaultProviders::getProviders())
+    ->withProviders((new DefaultProviders())->toArray())
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
