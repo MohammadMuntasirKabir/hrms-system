@@ -6,7 +6,6 @@ use App\Models\Company;
 use App\Models\Department;
 use App\Observers\CompanyObserver;
 use App\Observers\DepartmentObserver;
-use App\View\Composers\SidebarComposer;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +24,6 @@ class AppServiceProvider extends ServiceProvider
     {
         URL::forceScheme('https');
         $this->configureDefaults();
-        $this->configureViewComposers();
         $this->configureObservers();
     }
 
@@ -46,11 +44,6 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
-    }
-
-    protected function configureViewComposers(): void
-    {
-        // View composers registered here if needed
     }
 
     protected function configureObservers(): void
