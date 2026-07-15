@@ -60,16 +60,10 @@ try {
 
 } catch (\Throwable $e) {
     http_response_code(500);
-
-    if (getenv('APP_DEBUG') !== 'false' && getenv('APP_ENV') !== 'production') {
-        header('Content-Type: text/plain');
-        echo 'EXCEPTION: '.get_class($e)."\n";
-        echo 'MESSAGE: '.$e->getMessage()."\n";
-        echo 'FILE: '.$e->getFile().':'.$e->getLine()."\n";
-        echo "TRACE:\n".$e->getTraceAsString()."\n";
-    } else {
-        echo 'Internal Server Error';
-    }
-
+    header('Content-Type: text/plain');
+    echo 'EXCEPTION: '.get_class($e)."\n";
+    echo 'MESSAGE: '.$e->getMessage()."\n";
+    echo 'FILE: '.$e->getFile().':'.$e->getLine()."\n";
+    echo "TRACE:\n".$e->getTraceAsString()."\n";
     exit(1);
 }
