@@ -1,19 +1,10 @@
 <?php
 
-// TEMP DIAGNOSTIC: surface fatal errors as plain text.
-register_shutdown_function(function () {
-    $e = error_get_last();
-    if ($e !== null && in_array($e['type'], [E_ERROR, E_PARSE, E_COMPILE_ERROR, E_CORE_ERROR], true)) {
-        http_response_code(500);
-        header('Content-Type: text/plain');
-        echo "FATAL: {$e['message']}\n";
-        echo "FILE: {$e['file']}:{$e['line']}\n";
-        exit(1);
-    }
-});
-
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
+
+// TEMP DIAGNOSTIC: surface bootstrap exceptions as plain text.
+try {
 
 // On Vercel the runtime filesystem is read-only (except /tmp), so point
 // Laravel's storage path at a writable location.
@@ -53,3 +44,13 @@ $response = $kernel->handle(
 )->send();
 
 $kernel->terminate($request, $response);
+
+} catch (\Throwable $e) {
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    echo "EXCEPTION: ".get_class($e)."\n";
+    echo "MESSAGE: ".$e->getMessage()."\n";
+    echo "FILE: ".$e->getFile().':'.$e->getLine()."\n";
+    echo "TRACE:\n".$e->getTraceAsString()."\n";
+    exit(1);
+}
