@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Database\NeonPgConnector;
 use App\Models\Company;
 use App\Models\Department;
 use App\Observers\CompanyObserver;
@@ -17,7 +18,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // Use the Neon-aware Postgres connector so the endpoint ID is passed
+        // to libpq (required when the client lacks SNI support, e.g. Vercel).
+        $this->app->bind('db.connector.pgsql', NeonPgConnector::class);
     }
 
     public function boot(): void
