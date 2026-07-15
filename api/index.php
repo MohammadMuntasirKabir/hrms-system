@@ -43,15 +43,18 @@ try {
 
     $kernel->terminate($request, $response);
 
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     http_response_code(500);
     header('Content-Type: text/plain');
 
-    if (getenv('APP_DEBUG') !== 'false') {
-        echo 'EXCEPTION: '.get_class($e)."\n";
-        echo 'MESSAGE: '.$e->getMessage()."\n";
-        echo 'FILE: '.$e->getFile().':'.$e->getLine()."\n";
-        echo "TRACE:\n".$e->getTraceAsString()."\n";
+    // Only surface details when explicitly in debug mode AND not production.
+    // Never leak stack traces (they can contain secrets / env values).
+    $debug = getenv('APP_DEBUG') === 'true' && getenv('APP_ENV') !== 'production';
+
+    if ($debug) {
+        echo 'Exception: '.get_class($e)."\n";
+        echo 'Message: '.$e->getMessage()."\n";
+        echo 'File: '.$e->getFile().':'.$e->getLine()."\n";
     } else {
         echo 'Internal Server Error';
     }
