@@ -1,0 +1,5 @@
+# On Vercel the app is served by the serverless function at api/index.php
+# via the rewrite in vercel.json. The default Laravel web entry
+# public/index.php must NOT be uploaded as a static file, otherwise a
+# request to "/" is served as raw PHP source (browser "downloads" it).
+public/index.php
