@@ -1,18 +1,21 @@
 # HRMS — Human Resource Management System
 
-A full-featured HRMS built with **Laravel 13**, **Livewire 4**, **Flux UI v2**, and **Spatie Laravel Permission**. Manages companies, departments, designations, employees, contracts, salaries, and job applicants with role-based access control.
+A full-featured HRMS built with **Laravel 13**, **Livewire 4**, **Flux UI v2**, **Tailwind CSS 4**, and **Spatie Laravel Permission**. Manages companies, departments, designations, employees, contracts, salaries, and job applicants with role-based access control.
+
+🌐 **Live Demo:** https://hrms-system-dun.vercel.app
 
 ## Tech Stack
 
 | Layer | Stack |
 |---|---|
-| Backend | Laravel 13 (PHP 8.3+) |
+| Backend | Laravel 13 (PHP 8.5+) |
 | Frontend | Livewire 4 + Flux UI v2 + Tailwind CSS 4 |
 | Auth | Laravel Fortify (Passkeys + 2FA) |
 | Permissions | Spatie Laravel Permission |
 | Database | SQLite (default) / MySQL / PostgreSQL |
 | Testing | Pest PHP v4 |
 | Build | Vite 8 |
+| Deploy | Vercel (PHP runtime `vercel-php@0.9.0`) |
 
 ## Features
 
@@ -49,7 +52,7 @@ A full-featured HRMS built with **Laravel 13**, **Livewire 4**, **Flux UI v2**, 
 
 ```bash
 git clone git@github.com:MohammadMuntasirKabir/hrms-system.git
-cd HRMS/HRM-System
+cd HRMS/HRM-System   # (or: cd hrms-system if cloned as the repo root)
 composer install
 npm install
 cp .env.example .env
@@ -59,6 +62,23 @@ npm run build
 # Or for development:
 composer run dev
 ```
+
+## Deploying to Vercel
+
+This project is deployed to Vercel using the PHP runtime (`vercel-php@0.9.0`). The
+`vercel.json` at the repo root routes all requests through a serverless PHP function
+(`api/index.php`) and serves the built `public/` directory.
+
+```bash
+# One-time
+vercel link
+
+# Build & deploy (the vercel.json buildCommand runs `npm install && npm run build`)
+vercel --prod
+```
+
+Environment variables required on Vercel: `APP_KEY`, `DB_CONNECTION`, `DB_DATABASE`
+(or your MySQL/PostgreSQL credentials), and any mail/cache config used in production.
 
 ## Default Login
 

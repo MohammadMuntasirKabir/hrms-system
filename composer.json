@@ -96,10 +96,7 @@
             "dont-discover": [
                 "laravel/pail",
                 "laravel/pao",
-                "laravel/sail",
-                "nunomaduro/collision",
-                "nunomaduro/termwind",
-                "pestphp/pest-plugin-laravel"
+                "laravel/sail"
             ],
             "installer": {
                 "post-create-project": []
