@@ -3,3 +3,10 @@
 # public/index.php must NOT be uploaded as a static file, otherwise a
 # request to "/" is served as raw PHP source (browser "downloads" it).
 public/index.php
+
+# Vercel runs `composer install && npm run build` during the build step
+# (see buildCommand in vercel.json), so these are regenerated server-side.
+# Excluding them keeps the CLI upload small and fast.
+vendor
+node_modules
+.git
