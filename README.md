@@ -67,15 +67,25 @@ composer run dev
 
 This project is deployed to Vercel using the PHP runtime (`vercel-php@0.9.0`). The
 `vercel.json` at the repo root routes all requests through a serverless PHP function
-(`api/index.php`) and serves the built `public/` directory.
+(`api/index.php`) and serves the built `public/` directory. The GitHub repo
+(`MohammadMuntasirKabir/hrms-system`) is connected to the Vercel project, so
+**pushing to `main` triggers a server-side production build automatically** — no local
+CLI upload needed.
 
 ```bash
-# One-time
+# One-time: link the project locally (optional; Git connection handles deploys)
 vercel link
 
-# Build & deploy (the vercel.json buildCommand runs `npm install && npm run build`)
+# Deploy: just push to main
+git push origin main        # Vercel builds & promotes automatically
+
+# Or force a manual CLI build (slower — re-uploads the project)
 vercel --prod
 ```
+
+> Note: `.vercelignore` excludes `vendor/`, `node_modules/`, and `.git/` from
+> uploads — Vercel runs `composer install && npm run build` itself during the build
+> step (see `buildCommand` in `vercel.json`).
 
 Environment variables required on Vercel: `APP_KEY`, `DB_CONNECTION`, `DB_DATABASE`
 (or your MySQL/PostgreSQL credentials), and any mail/cache config used in production.
