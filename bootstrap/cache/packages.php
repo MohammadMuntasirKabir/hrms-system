@@ -74,13 +74,6 @@
       0 => 'Carbon\\Laravel\\ServiceProvider',
     ),
   ),
-  'pestphp/pest-plugin-laravel' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Pest\\Laravel\\PestServiceProvider',
-    ),
-  ),
   'spatie/laravel-permission' => 
   array (
     'providers' => 
