@@ -96,7 +96,9 @@
             "dont-discover": [
                 "laravel/pail",
                 "laravel/pao",
-                "laravel/sail"
+                "laravel/sail",
+                "nunomaduro/collision",
+                "nunomaduro/termwind"
             ],
             "installer": {
                 "post-create-project": []
