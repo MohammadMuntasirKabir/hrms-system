@@ -2,7 +2,9 @@
 
 A full-featured HRMS built with **Laravel 13**, **Livewire 4**, **Flux UI v2**, **Tailwind CSS 4**, and **Spatie Laravel Permission**. Manages companies, departments, designations, employees, contracts, salaries, and job applicants with role-based access control.
 
-🌐 **Live Demo:** https://hrms-system-dun.vercel.app
+🌐 **Live Demo:** https://hrms-system-prod.vercel.app
+
+> Deployed via Git-connected push to `main` (Vercel builds server-side). Vercel Authentication is disabled on this project so the public demo is reachable.
 
 ## Tech Stack
 
