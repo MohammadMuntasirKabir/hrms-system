@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 /*
@@ -16,6 +17,16 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class);
+
+// The StoreCompanyFilter middleware persists `filter_company_id` in the session.
+// Pest shares the session across tests in the same process, so a test that
+// filters by company can leak that filter into later tests and change what
+// they see. Clear it after each test to keep tests isolated.
+afterEach(function () {
+    if (class_exists(Session::class)) {
+        session()->forget('filter_company_id');
+    }
+});
 
 /*
 |--------------------------------------------------------------------------

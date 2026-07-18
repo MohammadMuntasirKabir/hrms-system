@@ -67,7 +67,7 @@ class RolePermissionSeeder extends Seeder
             'profile.view', 'profile.edit', 'designations.view', 'contracts.view',
             'employees.view', 'leave.view', 'leave.approve', 'reports.view',
         ],
-        'employee' => ['profile.view', 'profile.edit', 'leave.view'],
+        'employee' => ['profile.view', 'profile.edit', 'leave.view', 'leave.manage'],
     ];
 
     public function run(): void

@@ -87,6 +87,16 @@
                         </flux:sidebar.item>
                     </flux:sidebar.group>
                 </flux:sidebar.nav>
+
+                @can('leave.view')
+                    <flux:sidebar.nav class="px-3">
+                        <flux:sidebar.group :heading="__('Workforce')" class="grid">
+                            <flux:sidebar.item icon="calendar" :href="route('leaves.index', session('filter_company_id') ? ['company_id' => session('filter_company_id')] : [])" :current="request()->routeIs('leaves.*')" wire:navigate>
+                                {{ __('Leave') }}
+                            </flux:sidebar.item>
+                        </flux:sidebar.group>
+                    </flux:sidebar.nav>
+                @endcan
             @endcan
 
             @can('applicants.view')
@@ -104,6 +114,26 @@
                     <flux:sidebar.group :heading="__('Finance')" class="grid">
                         <flux:sidebar.item icon="currency-dollar" :href="route('salaries.index', session('filter_company_id') ? ['company_id' => session('filter_company_id')] : [])" :current="request()->routeIs('salaries.*')" wire:navigate>
                             {{ __('Salaries') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+                </flux:sidebar.nav>
+            @endcan
+
+            @can('reports.view')
+                <flux:sidebar.nav class="px-3">
+                    <flux:sidebar.group :heading="__('Insights')" class="grid">
+                        <flux:sidebar.item icon="chart-bar" :href="route('reports.index', session('filter_company_id') ? ['company_id' => session('filter_company_id')] : [])" :current="request()->routeIs('reports.*')" wire:navigate>
+                            {{ __('Reports') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+                </flux:sidebar.nav>
+            @endcan
+
+            @can('roles.view')
+                <flux:sidebar.nav class="px-3">
+                    <flux:sidebar.group :heading="__('Administration')" class="grid">
+                        <flux:sidebar.item icon="list-bullet" :href="route('audit-logs.index', session('filter_company_id') ? ['company_id' => session('filter_company_id')] : [])" :current="request()->routeIs('audit-logs.*')" wire:navigate>
+                            {{ __('Audit Log') }}
                         </flux:sidebar.item>
                     </flux:sidebar.group>
                 </flux:sidebar.nav>

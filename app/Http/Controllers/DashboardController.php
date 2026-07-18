@@ -51,13 +51,14 @@ class DashboardController extends Controller
     private function getCompanyFilter(Request $request): ?int
     {
         $companyId = $request->input('company_id') ?? session('filter_company_id');
+
         return $companyId ? (int) $companyId : null;
     }
 
     private function getStats(User $user, Request $request): array
     {
         $companyId = $this->getCompanyFilter($request);
-        $cacheKey = 'dashboard_stats_' . $user->id . '_' . ($companyId ?? 'all');
+        $cacheKey = 'dashboard_stats_'.$user->id.'_'.($companyId ?? 'all');
 
         return cache()->remember($cacheKey, now()->addMinutes(5), function () use ($user, $companyId) {
             $companyIds = $user->isSuperAdmin()

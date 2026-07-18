@@ -55,10 +55,12 @@
     51 => 'Laravel\\Tinker\\TinkerServiceProvider',
     52 => 'Flux\\FluxServiceProvider',
     53 => 'Livewire\\LivewireServiceProvider',
-    54 => 'Carbon\\Laravel\\ServiceProvider',
-    55 => 'Spatie\\Permission\\PermissionServiceProvider',
-    56 => 'App\\Providers\\AppServiceProvider',
-    57 => 'App\\Providers\\FortifyServiceProvider',
+    54 => 'Livewire\\Volt\\VoltServiceProvider',
+    55 => 'Carbon\\Laravel\\ServiceProvider',
+    56 => 'Pest\\Laravel\\PestServiceProvider',
+    57 => 'Spatie\\Permission\\PermissionServiceProvider',
+    58 => 'App\\Providers\\AppServiceProvider',
+    59 => 'App\\Providers\\FortifyServiceProvider',
   ),
   'eager' => 
   array (
@@ -89,10 +91,12 @@
     24 => 'Laravel\\Roster\\RosterServiceProvider',
     25 => 'Flux\\FluxServiceProvider',
     26 => 'Livewire\\LivewireServiceProvider',
-    27 => 'Carbon\\Laravel\\ServiceProvider',
-    28 => 'Spatie\\Permission\\PermissionServiceProvider',
-    29 => 'App\\Providers\\AppServiceProvider',
-    30 => 'App\\Providers\\FortifyServiceProvider',
+    27 => 'Livewire\\Volt\\VoltServiceProvider',
+    28 => 'Carbon\\Laravel\\ServiceProvider',
+    29 => 'Pest\\Laravel\\PestServiceProvider',
+    30 => 'Spatie\\Permission\\PermissionServiceProvider',
+    31 => 'App\\Providers\\AppServiceProvider',
+    32 => 'App\\Providers\\FortifyServiceProvider',
   ),
   'deferred' => 
   array (

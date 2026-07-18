@@ -3,7 +3,6 @@
 use App\Models\Company;
 use App\Models\Contract;
 use App\Models\Department;
-use App\Models\Designation;
 use App\Models\Salary;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
@@ -212,6 +211,5 @@ test('user active salary returns the latest active salary', function () {
     expect($activeSalary)->not->toBeNull();
     expect($activeSalary->id)->toBe($newSalary->id);
 });
-
 
 uses(RefreshDatabase::class);

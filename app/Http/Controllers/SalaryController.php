@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
-use App\Models\Contract;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Salary;
@@ -16,14 +15,14 @@ class SalaryController extends Controller
 {
     private function authorizeCompany(Request $request, Company $company): void
     {
-        if (!$request->user()->canViewCompany($company)) {
+        if (! $request->user()->canViewCompany($company)) {
             abort(403, 'You do not have access to this company\'s data.');
         }
     }
 
     private function authorizeSalaryAccess(Request $request): void
     {
-        if (!$request->user()->canViewSalaries()) {
+        if (! $request->user()->canViewSalaries()) {
             abort(403, 'You do not have permission to view salary information.');
         }
     }
@@ -31,6 +30,7 @@ class SalaryController extends Controller
     private function getCompanyFilter(Request $request): ?int
     {
         $companyId = $request->input('company_id') ?? session('filter_company_id');
+
         return $companyId ? (int) $companyId : null;
     }
 
@@ -44,7 +44,7 @@ class SalaryController extends Controller
 
         if ($companyId) {
             $query->where('company_id', $companyId);
-        } elseif (!$user->isSuperAdmin()) {
+        } elseif (! $user->isSuperAdmin()) {
             $query->whereIn('company_id', $user->getAllowedCompanyIds());
         }
 
@@ -63,7 +63,7 @@ class SalaryController extends Controller
             : Company::whereIn('id', $user->getAllowedCompanyIds())->orderBy('name')->get();
 
         $departments = Department::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -95,18 +95,18 @@ class SalaryController extends Controller
         $selectedCompanyId = $request->company_id ?? ($companies->count() === 1 ? $companies->first()->id : null);
 
         $users = User::where('is_active', true)
-            ->when($selectedCompanyId, fn($q) => $q->where('company_id', $selectedCompanyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($selectedCompanyId, fn ($q) => $q->where('company_id', $selectedCompanyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $departments = Department::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $designations = Designation::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('title')
             ->get();
 
@@ -157,7 +157,7 @@ class SalaryController extends Controller
         $salary = Salary::create($validated);
 
         return redirect()->route('salaries.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Salary for ' . $salary->user->name . ' created successfully.');
+            ->with('status', 'Salary for '.$salary->user->name.' created successfully.');
     }
 
     public function show(Request $request, Salary $salary): View
@@ -185,17 +185,17 @@ class SalaryController extends Controller
             : Company::whereIn('id', $user->getAllowedCompanyIds())->orderBy('name')->get();
 
         $users = User::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $departments = Department::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $designations = Designation::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('title')
             ->get();
 
@@ -239,7 +239,7 @@ class SalaryController extends Controller
         $salary->update($validated);
 
         return redirect()->route('salaries.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Salary for ' . $salary->user->name . ' updated successfully.');
+            ->with('status', 'Salary for '.$salary->user->name.' updated successfully.');
     }
 
     public function destroy(Request $request, Salary $salary): RedirectResponse
@@ -252,6 +252,6 @@ class SalaryController extends Controller
         $salary->delete();
 
         return redirect()->route('salaries.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Salary for ' . $userName . ' deleted.');
+            ->with('status', 'Salary for '.$userName.' deleted.');
     }
 }

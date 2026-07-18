@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Designation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class DesignationFactory extends Factory

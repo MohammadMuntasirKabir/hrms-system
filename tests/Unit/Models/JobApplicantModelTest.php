@@ -1,10 +1,11 @@
 <?php
 
-use App\Models\JobApplicant;
 use App\Models\Company;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\JobApplicant;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 // === Full Name Accessor ===
@@ -115,13 +116,12 @@ test('expected salary is cast to decimal', function () {
 
 test('available from is cast to date', function () {
     $applicant = JobApplicant::factory()->create(['available_from' => '2025-06-01']);
-    expect($applicant->available_from)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
+    expect($applicant->available_from)->toBeInstanceOf(CarbonImmutable::class);
 });
 
 test('reviewed at is cast to datetime', function () {
     $applicant = JobApplicant::factory()->create(['reviewed_at' => '2025-01-15 10:30:00']);
-    expect($applicant->reviewed_at)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
+    expect($applicant->reviewed_at)->toBeInstanceOf(CarbonImmutable::class);
 });
-
 
 uses(RefreshDatabase::class);

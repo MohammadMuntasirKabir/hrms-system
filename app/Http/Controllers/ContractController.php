@@ -14,7 +14,7 @@ class ContractController extends Controller
 {
     private function authorizeCompany(Request $request, Company $company): void
     {
-        if (!$request->user()->canViewCompany($company)) {
+        if (! $request->user()->canViewCompany($company)) {
             abort(403);
         }
     }
@@ -25,6 +25,7 @@ class ContractController extends Controller
     private function getCompanyFilter(Request $request): ?int
     {
         $companyId = $request->input('company_id') ?? session('filter_company_id');
+
         return $companyId ? (int) $companyId : null;
     }
 
@@ -35,7 +36,7 @@ class ContractController extends Controller
 
         $query = Contract::with(['user.designation', 'user.department', 'company', 'department']);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->whereIn('company_id', $user->getAllowedCompanyIds());
         } elseif ($companyId) {
             $query->where('company_id', $companyId);
@@ -56,8 +57,8 @@ class ContractController extends Controller
             : [];
 
         $departments = Department::where('is_active', true)
-            ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -82,14 +83,14 @@ class ContractController extends Controller
             : Company::whereIn('id', $user->getAllowedCompanyIds())->orderBy('name')->get();
 
         $departments = Department::where('is_active', true)
-            ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $users = User::where('is_active', true)
-            ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -117,14 +118,14 @@ class ContractController extends Controller
         $company = Company::findOrFail($validated['company_id']);
         $this->authorizeCompany($request, $company);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $validated['company_id'] = $user->company_id;
         }
 
         $contract = Contract::create($validated);
 
         return redirect()->route('contracts.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Contract for ' . $contract->user->name . ' created successfully.');
+            ->with('status', 'Contract for '.$contract->user->name.' created successfully.');
     }
 
     public function show(Request $request, Contract $contract): View
@@ -147,12 +148,12 @@ class ContractController extends Controller
             : Company::whereIn('id', $user->getAllowedCompanyIds())->orderBy('name')->get();
 
         $departments = Department::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
         $users = User::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -178,14 +179,14 @@ class ContractController extends Controller
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $validated['company_id'] = $user->company_id;
         }
 
         $contract->update($validated);
 
         return redirect()->route('contracts.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Contract for ' . $contract->user->name . ' updated successfully.');
+            ->with('status', 'Contract for '.$contract->user->name.' updated successfully.');
     }
 
     public function destroy(Request $request, Contract $contract): RedirectResponse
@@ -197,6 +198,6 @@ class ContractController extends Controller
         $contract->delete();
 
         return redirect()->route('contracts.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Contract for ' . $userName . ' deleted.');
+            ->with('status', 'Contract for '.$userName.' deleted.');
     }
 }

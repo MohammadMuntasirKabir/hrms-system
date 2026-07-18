@@ -85,6 +85,7 @@ class Salary extends Model
             'bi_weekly' => 26,
             default => 12,
         };
+
         return $this->net_salary * $multiplier;
     }
 }

@@ -1,10 +1,12 @@
 <?php
 
-use App\Models\Salary;
 use App\Models\Company;
-use App\Models\Department;
-use App\Models\User;
 use App\Models\Contract;
+use App\Models\Department;
+use App\Models\Designation;
+use App\Models\Salary;
+use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 // === Salary Calculation ===
@@ -112,7 +114,7 @@ test('salary belongs to department', function () {
 test('salary belongs to designation', function () {
     $company = Company::factory()->create();
     $dept = Department::factory()->create(['company_id' => $company->id]);
-    $desig = \App\Models\Designation::factory()->create(['company_id' => $company->id]);
+    $desig = Designation::factory()->create(['company_id' => $company->id]);
     $user = User::factory()->create(['company_id' => $company->id]);
     $salary = Salary::factory()->create([
         'user_id' => $user->id,
@@ -192,9 +194,8 @@ test('salary dates are cast to date', function () {
         'effective_until' => '2025-12-31',
     ]);
 
-    expect($salary->effective_from)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
-    expect($salary->effective_until)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
+    expect($salary->effective_from)->toBeInstanceOf(CarbonImmutable::class);
+    expect($salary->effective_until)->toBeInstanceOf(CarbonImmutable::class);
 });
-
 
 uses(RefreshDatabase::class);

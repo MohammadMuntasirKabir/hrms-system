@@ -55,6 +55,7 @@ class Contract extends Model
         if ($this->end_date === null) {
             return false;
         }
+
         return $this->end_date->isPast();
     }
 

@@ -1,10 +1,12 @@
 <?php
 
-use App\Models\Company;
-use App\Models\User;
 use App\Http\Middleware\EnsureUserHasPermission;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Models\Company;
+use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 beforeEach(function () {
     $this->seed(RolePermissionSeeder::class);
@@ -74,8 +76,8 @@ test('user without permission gets 403', function () {
 test('unauthenticated user gets 403 from permission middleware', function () {
     // The permission middleware is behind auth middleware, so this would
     // be caught by auth first. But testing the middleware directly:
-    $middleware = new EnsureUserHasPermission();
-    $request = \Illuminate\Http\Request::create('/test', 'GET');
+    $middleware = new EnsureUserHasPermission;
+    $request = Request::create('/test', 'GET');
     // No user set on request
 
     try {
@@ -83,7 +85,7 @@ test('unauthenticated user gets 403 from permission middleware', function () {
             return response('OK');
         });
         expect(false)->toBeTrue(); // Should not reach here
-    } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+    } catch (HttpException $e) {
         expect($e->getStatusCode())->toBe(403);
     }
 });

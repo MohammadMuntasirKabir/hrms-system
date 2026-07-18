@@ -13,7 +13,7 @@ class DesignationController extends Controller
 {
     private function authorizeCompany(Request $request, Company $company): void
     {
-        if (!$request->user()->canViewCompany($company)) {
+        if (! $request->user()->canViewCompany($company)) {
             abort(403);
         }
     }
@@ -21,6 +21,7 @@ class DesignationController extends Controller
     private function getCompanyFilter(Request $request): ?int
     {
         $companyId = $request->input('company_id') ?? session('filter_company_id');
+
         return $companyId ? (int) $companyId : null;
     }
 
@@ -31,7 +32,7 @@ class DesignationController extends Controller
 
         $query = Designation::with(['company', 'department'])->withCount('users');
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->whereIn('company_id', $user->getAllowedCompanyIds());
         } elseif ($companyId) {
             $query->where('company_id', $companyId);
@@ -48,8 +49,8 @@ class DesignationController extends Controller
             : [];
 
         $departments = Department::where('is_active', true)
-            ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -73,8 +74,8 @@ class DesignationController extends Controller
             : Company::whereIn('id', $user->getAllowedCompanyIds())->orderBy('name')->get();
 
         $departments = Department::where('is_active', true)
-            ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when($companyId, fn ($q) => $q->where('company_id', $companyId))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -104,7 +105,7 @@ class DesignationController extends Controller
         $designation = Designation::create($validated);
 
         return redirect()->route('designations.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Designation "' . $designation->title . '" created successfully.');
+            ->with('status', 'Designation "'.$designation->title.'" created successfully.');
     }
 
     public function show(Request $request, Designation $designation): View
@@ -130,7 +131,7 @@ class DesignationController extends Controller
             : Company::whereIn('id', $user->getAllowedCompanyIds())->orderBy('name')->get();
 
         $departments = Department::where('is_active', true)
-            ->when(!$user->isSuperAdmin(), fn($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('company_id', $user->getAllowedCompanyIds()))
             ->orderBy('name')
             ->get();
 
@@ -151,13 +152,14 @@ class DesignationController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $validated['company_id'] = $user->company_id;
         }
 
         $designation->update($validated);
+
         return redirect()->route('designations.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Designation "' . $designation->title . '" updated successfully.');
+            ->with('status', 'Designation "'.$designation->title.'" updated successfully.');
     }
 
     public function destroy(Request $request, Designation $designation): RedirectResponse
@@ -166,12 +168,13 @@ class DesignationController extends Controller
         $this->authorizeCompany($request, $designation->company);
 
         if ($designation->users()->count() > 0) {
-            return redirect()->route('designations.index')->with('error', 'Cannot delete "' . $designation->title . '" — assigned to ' . $designation->users()->count() . ' employee(s).');
+            return redirect()->route('designations.index')->with('error', 'Cannot delete "'.$designation->title.'" — assigned to '.$designation->users()->count().' employee(s).');
         }
 
         $title = $designation->title;
         $designation->delete();
+
         return redirect()->route('designations.index', $this->getCompanyFilter($request) ? ['company_id' => $this->getCompanyFilter($request)] : [])
-            ->with('status', 'Designation "' . $title . '" deleted.');
+            ->with('status', 'Designation "'.$title.'" deleted.');
     }
 }

@@ -1,9 +1,10 @@
 <?php
 
-use App\Models\Contract;
 use App\Models\Company;
+use App\Models\Contract;
 use App\Models\Department;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 // === Contract Accessors ===
@@ -133,9 +134,8 @@ test('contract dates are cast to date', function () {
         'end_date' => '2025-12-31',
     ]);
 
-    expect($contract->start_date)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
-    expect($contract->end_date)->toBeInstanceOf(\Carbon\CarbonImmutable::class);
+    expect($contract->start_date)->toBeInstanceOf(CarbonImmutable::class);
+    expect($contract->end_date)->toBeInstanceOf(CarbonImmutable::class);
 });
-
 
 uses(RefreshDatabase::class);

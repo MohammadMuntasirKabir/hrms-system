@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Company;
-use App\Models\JobApplicant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class JobApplicantFactory extends Factory

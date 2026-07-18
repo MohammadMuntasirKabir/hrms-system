@@ -157,5 +157,4 @@ test('is_active is cast to boolean', function () {
     expect($company->fresh()->is_active)->toBeFalse();
 });
 
-
 uses(RefreshDatabase::class);

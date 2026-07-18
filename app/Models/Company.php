@@ -82,7 +82,7 @@ class Company extends Model
 
     public function isSubCompany(): bool
     {
-        return !is_null($this->parent_company_id);
+        return ! is_null($this->parent_company_id);
     }
 
     public function getMainCompany(): Company
@@ -90,6 +90,7 @@ class Company extends Model
         if ($this->isHq()) {
             return $this;
         }
+
         return $this->parentCompany;
     }
 
@@ -99,6 +100,7 @@ class Company extends Model
         foreach ($this->childCompanies as $child) {
             $ids = array_merge($ids, $child->getAllSubCompanyIds());
         }
+
         return $ids;
     }
 }

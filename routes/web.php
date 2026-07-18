@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Controllers\ApplicantController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
+use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +57,31 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::middleware(['permission:payroll.view'])->group(function () {
         Route::resource('salaries', SalaryController::class)->except(['destroy']);
         Route::delete('/salaries/{salary}', [SalaryController::class, 'destroy'])->middleware('permission:payroll.manage')->name('salaries.destroy');
+    });
+
+    // Leave Management
+    Route::middleware(['permission:leave.view'])->group(function () {
+        Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves.index');
+        Route::get('/leaves/create', [LeaveController::class, 'create'])->middleware('permission:leave.manage')->name('leaves.create');
+        Route::post('/leaves', [LeaveController::class, 'store'])->middleware('permission:leave.manage')->name('leaves.store');
+        Route::get('/leaves/{leave}', [LeaveController::class, 'show'])->name('leaves.show');
+        Route::get('/leaves/{leave}/edit', [LeaveController::class, 'edit'])->middleware('permission:leave.manage')->name('leaves.edit');
+        Route::put('/leaves/{leave}', [LeaveController::class, 'update'])->middleware('permission:leave.manage')->name('leaves.update');
+        Route::delete('/leaves/{leave}', [LeaveController::class, 'destroy'])->middleware('permission:leave.manage')->name('leaves.destroy');
+        Route::post('/leaves/{leave}/approve', [LeaveController::class, 'approve'])->middleware('permission:leave.approve')->name('leaves.approve');
+        Route::post('/leaves/{leave}/reject', [LeaveController::class, 'reject'])->middleware('permission:leave.approve')->name('leaves.reject');
+        Route::post('/leaves/{leave}/cancel', [LeaveController::class, 'cancel'])->middleware('permission:leave.manage')->name('leaves.cancel');
+    });
+
+    // Reports
+    Route::middleware(['permission:reports.view'])->group(function () {
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/export', [ReportController::class, 'export'])->middleware('permission:reports.export')->name('reports.export');
+    });
+
+    // Audit Log (super admin / company admin)
+    Route::middleware(['permission:roles.view'])->group(function () {
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     });
 
     // Job Applicants
