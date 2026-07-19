@@ -2,6 +2,8 @@
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Throwable;
 
 try {
 
@@ -33,6 +35,25 @@ try {
 
     if (getenv('LARAVEL_STORAGE_PATH') !== false) {
         $app->useStoragePath(getenv('LARAVEL_STORAGE_PATH'));
+    }
+
+    // Self-healing migrations: ensure the database schema is up to date on
+    // every cold start. Vercel's build step has no PHP runtime, so we run
+    // migrations at request time (idempotent — a no-op when nothing is
+    // pending). A lock file in /tmp prevents concurrent migrations during
+    // scale-out. This keeps the Neon schema in sync after every deploy.
+    if (getenv('VERCEL') !== false || isset($_SERVER['VERCEL'])) {
+        $migrateLock = '/tmp/laravel-migrate.lock';
+        if (! file_exists($migrateLock) && ($lock = fopen($migrateLock, 'x')) !== false) {
+            fclose($lock);
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (Throwable $e) {
+                // Never block requests if migration fails; log and continue.
+                error_log('Migration failed: '.$e->getMessage());
+            }
+            @unlink($migrateLock);
+        }
     }
 
     $kernel = $app->make(Kernel::class);

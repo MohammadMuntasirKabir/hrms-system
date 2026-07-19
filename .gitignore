@@ -31,3 +31,9 @@ public/build/
 
 # Laravel generated cache (regenerated per-environment)
 /bootstrap/cache/*.php
+
+
+# Temporary env files (never commit)
+.env.vercel
+.env.neon_tmp
+.env.local

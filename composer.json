@@ -11,10 +11,8 @@
     "require": {
         "php": "^8.3",
         "laravel/boost": "^2.4.10",
-        "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
         "laravel/framework": "^13.16.1",
-        "laravel/tinker": "^3.0",
         "livewire/flux": "^2.15.0",
         "livewire/livewire": "^4.3.1",
         "livewire/volt": "^1.10",
@@ -22,11 +20,12 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",
-        "laravel/boost": "^2.4.10",
+        "laravel/chisel": "^0.1.0",
         "laravel/pail": "^1.2.7",
         "laravel/pao": "^1.1.1",
         "laravel/pint": "^1.29.3",
         "laravel/sail": "^1.62.0",
+        "laravel/tinker": "^3.0",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.9.3",
         "pestphp/pest": "^4.7.3",
@@ -70,7 +69,7 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@lint:check",
-            "@php artisan test"
+            "pest"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
