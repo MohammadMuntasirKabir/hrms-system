@@ -18,23 +18,36 @@ use App\Models\User;
 use App\Models\Company;
 
 // TEMP DIAGNOSTIC ROUTE — renders the dashboard as the first super admin
-// against the live DB so we can read the real exception. Remove after fix.
+// against the live DB so we can read the real exception. Also supports
+// running pending migrations (?migrate=1). Remove after fix.
 Route::get('/__diag_dash', function () {
     if (request('k') !== 'hrms_diag_2026') {
         abort(404);
     }
+
+    if (request('migrate') === '1') {
+        try {
+            \Artisan::call('migrate', ['--force' => true]);
+            $migrateOut = \Artisan::output();
+        } catch (\Throwable $e) {
+            $migrateOut = 'MIGRATE ERROR: '.$e->getMessage();
+        }
+    } else {
+        $migrateOut = '(skip — pass ?migrate=1)';
+    }
+
     $u = User::whereHas('roles', fn ($q) => $q->where('name', 'super_admin'))->first()
         ?? User::whereHas('roles', fn ($q) => $q->whereIn('name', ['company_admin', 'hr_manager']))->first()
         ?? User::first();
     if (! $u) {
-        return 'no user found';
+        return 'no user found. Migrate output: '.$migrateOut;
     }
     Auth::login($u);
     try {
         $resp = app(\App\Http\Controllers\DashboardController::class)->index(request());
-        return 'OK status '.$resp->getStatusCode();
+        return 'OK status '.$resp->getStatusCode()."\n\nMigrate: ".$migrateOut;
     } catch (\Throwable $e) {
-        return response('<pre>'.get_class($e).": ".$e->getMessage()."\n\n".$e->getTraceAsString().'</pre>');
+        return response('<pre>Migrate: '.$migrateOut."\n\n".get_class($e).": ".$e->getMessage()."\n\n".$e->getTraceAsString().'</pre>');
     }
 });
 
