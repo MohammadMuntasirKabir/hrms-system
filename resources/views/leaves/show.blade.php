@@ -84,7 +84,33 @@
 
             <div class="hrms-card">
                 <div class="hrms-card-body flex flex-col gap-3">
-                    <flux:heading size="lg" level="2" class="text-zinc-900 dark:text-white">{{ __('Actions') }}</flux:heading>
+                    <flux:heading size="lg" level="2" class="text-zinc-900 dark:text-white">{{ __('Leave Balance ('.now()->year.')') }}</flux:heading>
+
+                    @php
+                        $balance = \App\Models\Leave::balanceFor($leave->user_id);
+                    @endphp
+
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-zinc-500 dark:text-zinc-400">{{ __('Allowance') }}</span>
+                            <span class="font-medium text-zinc-900 dark:text-white">{{ $balance['allowance'] }} {{ __('days') }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-zinc-500 dark:text-zinc-400">{{ __('Taken') }}</span>
+                            <span class="font-medium text-zinc-900 dark:text-white">{{ $balance['taken'] }} {{ __('days') }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-zinc-500 dark:text-zinc-400">{{ __('Pending') }}</span>
+                            <span class="font-medium text-zinc-900 dark:text-white">{{ $balance['pending'] }} {{ __('days') }}</span>
+                        </div>
+                        <div class="h-px bg-zinc-100 dark:bg-zinc-800 my-1"></div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-zinc-500 dark:text-zinc-400 font-medium">{{ __('Remaining') }}</span>
+                            <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">{{ $balance['remaining'] }} {{ __('days') }}</span>
+                        </div>
+                    </div>
+
+                    <flux:heading size="lg" level="2" class="text-zinc-900 dark:text-white pt-2">{{ __('Actions') }}</flux:heading>
 
                     @can('leave.approve')
                         @if ($leave->isPending)

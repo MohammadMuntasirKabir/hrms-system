@@ -82,4 +82,48 @@ class Leave extends Model
     {
         return $query->where('status', 'approved');
     }
+
+    /**
+     * Total approved leave days taken by a user in a given year.
+     */
+    public static function daysTakenInYear(int $userId, int $year): int
+    {
+        return (int) self::query()
+            ->where('user_id', $userId)
+            ->where('status', 'approved')
+            ->whereYear('start_date', $year)
+            ->sum('total_days');
+    }
+
+    /**
+     * Remaining annual leave allowance for the current year.
+     * The yearly allowance is configurable via the `leave.annual_allowance`
+     * config (defaults to 20 days). Unpaid leave does not count against it.
+     */
+    public static function balanceFor(int $userId, ?int $year = null): array
+    {
+        $year = $year ?? (int) now()->year;
+        $allowance = (int) config('hrms.annual_leave_allowance', 20);
+
+        $taken = (int) self::query()
+            ->where('user_id', $userId)
+            ->where('status', 'approved')
+            ->where('type', '!=', 'unpaid')
+            ->whereYear('start_date', $year)
+            ->sum('total_days');
+
+        $pending = (int) self::query()
+            ->where('user_id', $userId)
+            ->where('status', 'pending')
+            ->where('type', '!=', 'unpaid')
+            ->whereYear('start_date', $year)
+            ->sum('total_days');
+
+        return [
+            'allowance' => $allowance,
+            'taken' => $taken,
+            'pending' => $pending,
+            'remaining' => max(0, $allowance - $taken - $pending),
+        ];
+    }
 }

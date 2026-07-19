@@ -10,6 +10,7 @@ use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalaryController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +24,9 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Global Search (any authenticated user)
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
 
     // Companies
     Route::middleware(['permission:companies.view'])->group(function () {
@@ -77,6 +81,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::middleware(['permission:reports.view'])->group(function () {
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [ReportController::class, 'export'])->middleware('permission:reports.export')->name('reports.export');
+        Route::get('/reports/export-expiring', [ReportController::class, 'exportExpiringContracts'])->middleware('permission:reports.export')->name('reports.export-expiring');
     });
 
     // Audit Log (super admin / company admin)

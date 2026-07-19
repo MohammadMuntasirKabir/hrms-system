@@ -34,6 +34,35 @@
             </div>
         </div>
 
+        <!-- Pipeline Visualization -->
+        @php
+            $pipelineTotal = $statusCounts['pending'] + $statusCounts['reviewing'] + $statusCounts['shortlisted'] + $statusCounts['hired'] + $statusCounts['rejected'];
+        @endphp
+        @if ($pipelineTotal > 0)
+            <div class="hrms-card">
+                <div class="hrms-card-body py-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <flux:text class="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{{ __('Recruitment Pipeline') }}</flux:text>
+                        <flux:text class="text-xs text-zinc-500 dark:text-zinc-400">{{ $pipelineTotal }} {{ __('total') }}</flux:text>
+                    </div>
+                    <div class="flex w-full h-2.5 rounded-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                        @if ($statusCounts['pending'] > 0)<div class="bg-zinc-400 dark:bg-zinc-500" style="width: {{ ($statusCounts['pending'] / $pipelineTotal) * 100 }}%" title="{{ __('Pending') }}: {{ $statusCounts['pending'] }}"></div>@endif
+                        @if ($statusCounts['reviewing'] > 0)<div class="bg-blue-500" style="width: {{ ($statusCounts['reviewing'] / $pipelineTotal) * 100 }}%" title="{{ __('Reviewing') }}: {{ $statusCounts['reviewing'] }}"></div>@endif
+                        @if ($statusCounts['shortlisted'] > 0)<div class="bg-purple-500" style="width: {{ ($statusCounts['shortlisted'] / $pipelineTotal) * 100 }}%" title="{{ __('Shortlisted') }}: {{ $statusCounts['shortlisted'] }}"></div>@endif
+                        @if ($statusCounts['hired'] > 0)<div class="bg-emerald-500" style="width: {{ ($statusCounts['hired'] / $pipelineTotal) * 100 }}%" title="{{ __('Hired') }}: {{ $statusCounts['hired'] }}"></div>@endif
+                        @if ($statusCounts['rejected'] > 0)<div class="bg-red-500" style="width: {{ ($statusCounts['rejected'] / $pipelineTotal) * 100 }}%" title="{{ __('Rejected') }}: {{ $statusCounts['rejected'] }}"></div>@endif
+                    </div>
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                        <span class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400"><span class="size-2 rounded-full bg-zinc-400 dark:bg-zinc-500"></span>{{ __('Pending') }} {{ $statusCounts['pending'] }}</span>
+                        <span class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400"><span class="size-2 rounded-full bg-blue-500"></span>{{ __('Reviewing') }} {{ $statusCounts['reviewing'] }}</span>
+                        <span class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400"><span class="size-2 rounded-full bg-purple-500"></span>{{ __('Shortlisted') }} {{ $statusCounts['shortlisted'] }}</span>
+                        <span class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400"><span class="size-2 rounded-full bg-emerald-500"></span>{{ __('Hired') }} {{ $statusCounts['hired'] }}</span>
+                        <span class="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400"><span class="size-2 rounded-full bg-red-500"></span>{{ __('Rejected') }} {{ $statusCounts['rejected'] }}</span>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Filters -->
         <div class="flex flex-wrap gap-1.5 sm:gap-2">
             <flux:button :href="route('applicants.index')" size="sm" variant="{{ !$filterStatus && !$filterDepartment && !$filterCompany ? 'primary' : 'outline' }}" wire:navigate>{{ __('All') }}</flux:button>

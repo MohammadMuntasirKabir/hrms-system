@@ -61,6 +61,31 @@ class ReportController extends Controller
             'rejected' => Leave::whereIn('company_id', $companyIds)->where('status', 'rejected')->count(),
         ];
 
+        // Leave utilization: total approved leave days per company scope.
+        $approvedLeaveDays = (int) Leave::whereIn('company_id', $companyIds)
+            ->where('status', 'approved')
+            ->sum('total_days');
+
+        $leaveUtilization = [
+            'pending' => $leaveStats['pending'],
+            'approved' => $leaveStats['approved'],
+            'rejected' => $leaveStats['rejected'],
+            'approved_days' => $approvedLeaveDays,
+            'avg_days_per_approved' => $leaveStats['approved'] > 0
+                ? round($approvedLeaveDays / $leaveStats['approved'], 1)
+                : 0,
+        ];
+
+        $expiringContracts = Contract::whereIn('company_id', $companyIds)
+            ->where('status', 'active')
+            ->whereNotNull('end_date')
+            ->where('end_date', '<=', now()->addDays(30))
+            ->where('end_date', '>=', now())
+            ->with(['user', 'company'])
+            ->orderBy('end_date')
+            ->limit(15)
+            ->get();
+
         $companies = $request->user()->isSuperAdmin()
             ? Company::where('is_active', true)->orderBy('name')->get()
             : [];
@@ -74,6 +99,8 @@ class ReportController extends Controller
             'totalPayroll' => $totalPayroll,
             'byDepartment' => $byDepartment,
             'leaveStats' => $leaveStats,
+            'leaveUtilization' => $leaveUtilization,
+            'expiringContracts' => $expiringContracts,
         ]);
     }
 
@@ -109,6 +136,46 @@ class ReportController extends Controller
         fclose($csv);
 
         $filename = 'hrms-report-'.Carbon::now()->format('Y-m-d').'.csv';
+
+        return response($content, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
+    public function exportExpiringContracts(Request $request): Response
+    {
+        $scope = $this->companyScope($request);
+        $companyIds = $this->allowedCompanyIds($request, $scope);
+
+        $contracts = Contract::whereIn('company_id', $companyIds)
+            ->where('status', 'active')
+            ->whereNotNull('end_date')
+            ->where('end_date', '<=', now()->addDays(30))
+            ->where('end_date', '>=', now())
+            ->with(['user', 'company'])
+            ->orderBy('end_date')
+            ->get();
+
+        $csv = fopen('php://temp', 'r+');
+        fputcsv($csv, ['Employee', 'Email', 'Company', 'Position', 'End Date', 'Days Remaining']);
+
+        foreach ($contracts as $c) {
+            fputcsv($csv, [
+                $c->user?->name,
+                $c->user?->email,
+                $c->company?->name,
+                $c->position,
+                $c->end_date->format('Y-m-d'),
+                $c->end_date->diffInDays(now()),
+            ]);
+        }
+
+        rewind($csv);
+        $content = stream_get_contents($csv);
+        fclose($csv);
+
+        $filename = 'hrms-expiring-contracts-'.Carbon::now()->format('Y-m-d').'.csv';
 
         return response($content, 200, [
             'Content-Type' => 'text/csv',

@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Contract;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\Leave;
 use App\Models\Salary;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,32 +21,115 @@ class DashboardController extends Controller
         $recentItems = $this->getRecentItems($user, $request);
 
         if ($user->isSuperAdmin()) {
+            $actionData = $this->getActionRequiredData($user);
+
             return view('dashboard.super-admin', [
                 'user' => $user,
                 'stats' => $stats,
                 'recentItems' => $recentItems,
+                'pendingLeaves' => $actionData['pendingLeaves'],
+                'expiringContracts' => $actionData['expiringContracts'],
             ]);
         }
 
         if ($user->hasAnyRole(['company_admin', 'hr_manager'])) {
+            $actionData = $this->getActionRequiredData($user);
+
             return view('dashboard.admin', [
                 'user' => $user,
                 'stats' => $stats,
                 'recentItems' => $recentItems,
+                'pendingLeaves' => $actionData['pendingLeaves'],
+                'expiringContracts' => $actionData['expiringContracts'],
             ]);
         }
 
         if ($user->hasRole('department_head')) {
+            $teamData = $this->getDepartmentHeadData($user);
+
             return view('dashboard.dept-head', [
                 'user' => $user,
                 'stats' => $stats,
+                'team' => $teamData['team'],
+                'pendingLeaves' => $teamData['pendingLeaves'],
+                'expiringContracts' => $teamData['expiringContracts'],
             ]);
         }
+
+        $employeeData = $this->getEmployeeData($user);
 
         return view('dashboard.employee', [
             'user' => $user,
             'stats' => $stats,
+            'activeContract' => $employeeData['activeContract'],
+            'myLeaves' => $employeeData['myLeaves'],
+            'leaveSummary' => $employeeData['leaveSummary'],
         ]);
+    }
+
+    private function getDepartmentHeadData(User $user): array
+    {
+        $companyIds = $user->getAllowedCompanyIds();
+        $departmentId = $user->department_id;
+
+        $team = User::query()
+            ->where('department_id', $departmentId)
+            ->whereIn('company_id', $companyIds)
+            ->where('is_active', true)
+            ->with(['designation', 'department'])
+            ->orderBy('name')
+            ->get();
+
+        $teamIds = $team->pluck('id')->all();
+
+        $pendingLeaves = Leave::query()
+            ->whereIn('user_id', $teamIds)
+            ->where('status', 'pending')
+            ->with(['user'])
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
+        $expiringContracts = Contract::query()
+            ->whereIn('user_id', $teamIds)
+            ->where('status', 'active')
+            ->whereNotNull('end_date')
+            ->where('end_date', '<=', now()->addDays(30))
+            ->where('end_date', '>=', now())
+            ->with(['user'])
+            ->orderBy('end_date')
+            ->limit(10)
+            ->get();
+
+        return [
+            'team' => $team,
+            'pendingLeaves' => $pendingLeaves,
+            'expiringContracts' => $expiringContracts,
+        ];
+    }
+
+    private function getEmployeeData(User $user): array
+    {
+        $activeContract = $user->activeContract;
+
+        $myLeaves = Leave::query()
+            ->where('user_id', $user->id)
+            ->with(['approver'])
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+
+        $leaveSummary = [
+            'total' => Leave::where('user_id', $user->id)->count(),
+            'pending' => Leave::where('user_id', $user->id)->where('status', 'pending')->count(),
+            'approved' => Leave::where('user_id', $user->id)->where('status', 'approved')->count(),
+        ];
+
+        return [
+            'activeContract' => $activeContract,
+            'myLeaves' => $myLeaves,
+            'leaveSummary' => $leaveSummary,
+        ];
     }
 
     private function getCompanyFilter(Request $request): ?int
@@ -124,6 +208,36 @@ class DashboardController extends Controller
                 ? (clone $companyQuery)->latest()->take(5)->get()
                 : collect(),
             'recentContracts' => (clone $contractQuery)->latest('start_date')->take(5)->get(),
+        ];
+    }
+
+    private function getActionRequiredData(User $user): array
+    {
+        $companyIds = $user->isSuperAdmin()
+            ? null
+            : $user->getAllowedCompanyIds();
+
+        $pendingLeaveQuery = Leave::query()
+            ->where('status', 'pending')
+            ->with(['user.department', 'company'])
+            ->orderByDesc('created_at');
+
+        $expiringQuery = Contract::query()
+            ->where('status', 'active')
+            ->whereNotNull('end_date')
+            ->where('end_date', '<=', now()->addDays(30))
+            ->where('end_date', '>=', now())
+            ->with(['user.department', 'company'])
+            ->orderBy('end_date');
+
+        if ($companyIds !== null) {
+            $pendingLeaveQuery->whereIn('company_id', $companyIds);
+            $expiringQuery->whereIn('company_id', $companyIds);
+        }
+
+        return [
+            'pendingLeaves' => $pendingLeaveQuery->limit(10)->get(),
+            'expiringContracts' => $expiringQuery->limit(10)->get(),
         ];
     }
 }
