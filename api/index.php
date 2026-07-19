@@ -47,8 +47,15 @@ try {
     http_response_code(500);
     header('Content-Type: text/plain');
 
-    // TEMP DIAGNOSTIC: log the real exception to stderr (Vercel captures this).
-    fwrite(STDERR, 'DIAG: '.get_class($e).': '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine()."\n");
+    // TEMP DIAGNOSTIC: surface the real exception only when a secret query
+    // param is supplied, so it is not publicly leaked.
+    if (($_GET['diag'] ?? null) === 'hrms_diag_2026') {
+        echo 'DIAG Exception: '.get_class($e)."\n";
+        echo 'Message: '.$e->getMessage()."\n";
+        echo 'File: '.$e->getFile().':'.$e->getLine()."\n";
+        echo "Trace:\n".$e->getTraceAsString()."\n";
+        exit(1);
+    }
 
     // Only surface details when explicitly in debug mode AND not production.
     // Never leak stack traces (they can contain secrets / env values).
