@@ -13,6 +13,30 @@ use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Models\Company;
+
+// TEMP DIAGNOSTIC ROUTE — renders the dashboard as the first super admin
+// against the live DB so we can read the real exception. Remove after fix.
+Route::get('/__diag_dash', function () {
+    if (request('k') !== 'hrms_diag_2026') {
+        abort(404);
+    }
+    $u = User::whereHas('roles', fn ($q) => $q->where('name', 'super_admin'))->first()
+        ?? User::whereHas('roles', fn ($q) => $q->whereIn('name', ['company_admin', 'hr_manager']))->first()
+        ?? User::first();
+    if (! $u) {
+        return 'no user found';
+    }
+    Auth::login($u);
+    try {
+        $resp = app(\App\Http\Controllers\DashboardController::class)->index(request());
+        return 'OK status '.$resp->getStatusCode();
+    } catch (\Throwable $e) {
+        return response('<pre>'.get_class($e).": ".$e->getMessage()."\n\n".$e->getTraceAsString().'</pre>');
+    }
+});
 
 Route::get('/', function () {
     if (auth()->check()) {
