@@ -47,6 +47,9 @@ try {
     http_response_code(500);
     header('Content-Type: text/plain');
 
+    // TEMP DIAGNOSTIC: log the real exception to stderr (Vercel captures this).
+    fwrite(STDERR, 'DIAG: '.get_class($e).': '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine()."\n");
+
     // Only surface details when explicitly in debug mode AND not production.
     // Never leak stack traces (they can contain secrets / env values).
     $debug = getenv('APP_DEBUG') === 'true' && getenv('APP_ENV') !== 'production';
