@@ -99,7 +99,8 @@
                 "laravel/pao",
                 "laravel/sail",
                 "nunomaduro/collision",
-                "nunomaduro/termwind"
+                "nunomaduro/termwind",
+                "pestphp/pest-plugin-laravel"
             ],
             "installer": {
                 "post-create-project": []

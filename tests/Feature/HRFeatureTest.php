@@ -1123,24 +1123,26 @@ test('applicant index filters by department', function () {
     $user = createCompanyAdmin();
     $company = Company::where('id', $user->company_id)->first();
     $dept = Department::factory()->create(['company_id' => $company->id]);
-    JobApplicant::factory()->create(['company_id' => $company->id, 'department_id' => $dept->id, 'first_name' => 'Dept', 'last_name' => 'User', 'email' => 'dept_filter@example.com']);
+    JobApplicant::factory()->create(['company_id' => $company->id, 'department_id' => $dept->id, 'status' => 'pending', 'first_name' => 'Dept', 'last_name' => 'User', 'email' => 'dept_filter@example.com']);
 
-    $response = $this->actingAs($user)->get(route('applicants.index', ['department_id' => $dept->id]));
+    $response = $this->actingAs($user)->get(route('applicants.index', ['department_id' => $dept->id, 'company_id' => $company->id]));
     $response->assertOk();
     $response->assertSee('Dept');
 });
 
 test('applicant index shows applicant details', function () {
+    session()->forget('filter_company_id');
     $user = createCompanyAdmin();
     $company = Company::where('id', $user->company_id)->first();
     $applicant = JobApplicant::factory()->create([
         'company_id' => $company->id,
+        'status' => 'pending',
         'first_name' => 'John',
         'last_name' => 'Doe',
         'email' => 'john_doe@example.com',
     ]);
 
-    $response = $this->actingAs($user)->get(route('applicants.index'));
+    $response = $this->actingAs($user)->get(route('applicants.index', ['company_id' => $company->id]));
     $response->assertOk();
     $response->assertSee('John');
     $response->assertSee('john_doe@example.com');
@@ -1611,8 +1613,8 @@ test('super admin can filter applicants by company', function () {
     session()->forget('filter_company_id');
     $user = createSuperAdmin();
     $companies = Company::factory()->count(2)->create();
-    JobApplicant::factory()->create(['company_id' => $companies[0]->id, 'first_name' => 'Company', 'last_name' => 'One', 'email' => 'company_one@example.com']);
-    JobApplicant::factory()->create(['company_id' => $companies[1]->id, 'first_name' => 'Company', 'last_name' => 'Two', 'email' => 'company_two@example.com']);
+    JobApplicant::factory()->create(['company_id' => $companies[0]->id, 'status' => 'pending', 'first_name' => 'Company', 'last_name' => 'One', 'email' => 'company_one@example.com']);
+    JobApplicant::factory()->create(['company_id' => $companies[1]->id, 'status' => 'pending', 'first_name' => 'Company', 'last_name' => 'Two', 'email' => 'company_two@example.com']);
 
     $response = $this->actingAs($user)->get(route('applicants.index', ['company_id' => $companies[0]->id]));
     $response->assertOk();
