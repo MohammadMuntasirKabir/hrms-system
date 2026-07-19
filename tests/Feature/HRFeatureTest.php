@@ -1608,6 +1608,7 @@ test('company show page displays departments designations and contracts', functi
 // Super Admin Cross-Company Tests
 // ============================================================
 test('super admin can filter applicants by company', function () {
+    session()->forget('filter_company_id');
     $user = createSuperAdmin();
     $companies = Company::factory()->count(2)->create();
     JobApplicant::factory()->create(['company_id' => $companies[0]->id, 'first_name' => 'Company', 'last_name' => 'One', 'email' => 'company_one@example.com']);

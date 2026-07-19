@@ -23,6 +23,14 @@ try {
 
     define('LARAVEL_START', microtime(true));
 
+    // TEMP DIAGNOSTIC: enable debug when secret param supplied, so Laravel
+    // renders the real exception instead of the generic 500 page.
+    if (($_GET['diag'] ?? null) === 'hrms_diag_2026') {
+        $_ENV['APP_DEBUG'] = 'true';
+        $_SERVER['APP_DEBUG'] = 'true';
+        putenv('APP_DEBUG=true');
+    }
+
     if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
         require $maintenance;
     }

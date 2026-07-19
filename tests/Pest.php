@@ -21,7 +21,13 @@ pest()->extend(TestCase::class)
 // The StoreCompanyFilter middleware persists `filter_company_id` in the session.
 // Pest shares the session across tests in the same process, so a test that
 // filters by company can leak that filter into later tests and change what
-// they see. Clear it after each test to keep tests isolated.
+// they see. Clear it before AND after each test to keep tests isolated.
+beforeEach(function () {
+    if (class_exists(Session::class)) {
+        session()->forget('filter_company_id');
+    }
+});
+
 afterEach(function () {
     if (class_exists(Session::class)) {
         session()->forget('filter_company_id');
